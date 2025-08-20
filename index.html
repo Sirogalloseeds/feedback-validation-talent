@@ -789,24 +789,40 @@
                     document.querySelectorAll('.scale-option').forEach(o => o.classList.remove('selected'));
                     this.classList.add('selected');
                     responses.feedbackUtility = this.dataset.value;
-                    checkFeedbackSurveyComplete();
+                    // Solo verificar si estamos en la pantalla de feedback
+                    if (!document.getElementById('feedback-report').classList.contains('hidden')) {
+                        checkFeedbackSurveyComplete();
+                    }
                 });
             });
 
             // Textareas
-            document.querySelector('textarea[name="additionalComment"]').addEventListener('input', function() {
-                responses.additionalComment = this.value;
-            });
+            const additionalCommentTextarea = document.querySelector('textarea[name="additionalComment"]');
+            if (additionalCommentTextarea) {
+                additionalCommentTextarea.addEventListener('input', function() {
+                    responses.additionalComment = this.value;
+                });
+            }
 
-            document.querySelector('textarea[name="includeMore"]').addEventListener('input', function() {
-                responses.includeMore = this.value;
-                checkFeedbackSurveyComplete();
-            });
+            const includeMoreTextarea = document.querySelector('textarea[name="includeMore"]');
+            if (includeMoreTextarea) {
+                includeMoreTextarea.addEventListener('input', function() {
+                    responses.includeMore = this.value;
+                    if (!document.getElementById('feedback-report').classList.contains('hidden')) {
+                        checkFeedbackSurveyComplete();
+                    }
+                });
+            }
 
-            document.querySelector('textarea[name="whatMissing"]').addEventListener('input', function() {
-                responses.whatMissing = this.value;
-                checkFeedbackSurveyComplete();
-            });
+            const whatMissingTextarea = document.querySelector('textarea[name="whatMissing"]');
+            if (whatMissingTextarea) {
+                whatMissingTextarea.addEventListener('input', function() {
+                    responses.whatMissing = this.value;
+                    if (!document.getElementById('feedback-report').classList.contains('hidden')) {
+                        checkFeedbackSurveyComplete();
+                    }
+                });
+            }
         }
 
         function setupRadioListeners(name, callback = null) {
@@ -815,7 +831,16 @@
                     updateRadioStyles(this);
                     responses[name] = this.value;
                     if (callback) callback();
-                    checkInterviewSurveyComplete();
+                    // Solo llamar a checkInterviewSurveyComplete si estamos en la pantalla de encuesta
+                    if (document.getElementById('interview-survey').style.display !== 'none' && 
+                        !document.getElementById('interview-survey').classList.contains('hidden')) {
+                        checkInterviewSurveyComplete();
+                    }
+                    // Solo llamar a checkFeedbackSurveyComplete si estamos en la pantalla de feedback
+                    if (document.getElementById('feedback-report').style.display !== 'none' && 
+                        !document.getElementById('feedback-report').classList.contains('hidden')) {
+                        checkFeedbackSurveyComplete();
+                    }
                 });
             });
         }
@@ -824,7 +849,10 @@
             document.querySelectorAll('.nps-option').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
             responses.nps = value;
-            checkInterviewSurveyComplete();
+            // Solo verificar si podemos enviar si estamos en la pantalla correcta
+            if (!document.getElementById('interview-survey').classList.contains('hidden')) {
+                checkInterviewSurveyComplete();
+            }
         }
 
         function updateRadioStyles(selectedRadio) {
@@ -863,13 +891,19 @@
         function checkInterviewSurveyComplete() {
             const required = ['nps', 'technicalProblems', 'conversationNatural', 'professionalExpression', 'englishReflection', 'wantsFeedback'];
             const isComplete = required.every(field => responses[field] !== null);
-            document.querySelector('#interview-survey .btn').disabled = !isComplete;
+            const submitBtn = document.querySelector('#interview-survey .btn');
+            if (submitBtn) {
+                submitBtn.disabled = !isComplete;
+            }
         }
 
         function checkFeedbackSurveyComplete() {
             const required = ['feedbackClarity', 'feedbackUtility', 'detailLevel'];
             const isComplete = required.every(field => responses[field] !== null);
-            document.querySelector('#feedback-report .btn').disabled = !isComplete;
+            const feedbackBtn = document.querySelector('#feedback-report .btn');
+            if (feedbackBtn) {
+                feedbackBtn.disabled = !isComplete;
+            }
         }
 
         async function submitInterviewSurvey() {
@@ -1005,7 +1039,12 @@
         console.log('🆔 ID del candidato:', responses.candidateId);
         if (responses.reportId) {
             console.log('📋 Report ID:', responses.reportId);
+            console.log('👤 Candidato:', responses.candidateName || 'No especificado');
+            console.log('💼 Posición:', responses.position || 'No especificado');
         }
+        
+        // Asegurar que el loading overlay esté oculto al inicio
+        showLoading(false);
     </script>
 </body>
 </html>
