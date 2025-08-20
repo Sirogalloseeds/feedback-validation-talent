@@ -963,28 +963,53 @@
 
         async function saveToGoogleSheets(data) {
             try {
-                // REEMPLAZA ESTA URL CON LA DE TU GOOGLE APPS SCRIPT
-                const response = await fetch('https://script.google.com/macros/s/AKfycbyzGVZHeiN1Z0PBy-xn75PrkRcSA4rYmcE-SKBNhSQ6lRnByVrVaGKEqdPO3CJQ_6nb/exec', {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
+                console.log('📊 Datos a guardar:', data);
+                
+                // Usar JSONP para evitar problemas de CORS
+                return await new Promise((resolve, reject) => {
+                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                    const timeoutId = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('Timeout: No response from server'));
+                    }, 10000);
+                    
+                    // Función de limpieza
+                    const cleanup = () => {
+                        if (window[callbackName]) {
+                            delete window[callbackName];
+                        }
+                        const script = document.getElementById(callbackName);
+                        if (script) {
+                            script.remove();
+                        }
+                        clearTimeout(timeoutId);
+                    };
+                    
+                    // Callback global
+                    window[callbackName] = function(response) {
+                        cleanup();
+                        console.log('✅ Respuesta de Google Sheets:', response);
+                        resolve(response);
+                    };
+                    
+                    // Crear script tag para JSONP
+                    const script = document.createElement('script');
+                    script.id = callbackName;
+                    script.src = `https://script.google.com/macros/s/AKfycbyzGVZHeiN1Z0PBy-xn75PrkRcSA4rYmcE-SKBNhSQ6lRnByVrVaGKEqdPO3CJQ_6nb/exec?callback=${callbackName}&data=${encodeURIComponent(JSON.stringify({
                         ...data,
                         ipAddress: await getUserIP().catch(() => 'No disponible'),
                         userAgent: navigator.userAgent,
                         url: window.location.href
-                    })
+                    }))}`;
+                    
+                    script.onerror = () => {
+                        cleanup();
+                        reject(new Error('Error loading script'));
+                    };
+                    
+                    document.head.appendChild(script);
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                console.log('✅ Guardado en Google Sheets:', result);
-                return result;
             } catch (error) {
                 console.error('❌ Error al guardar en Google Sheets:', error);
                 throw error;
