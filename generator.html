@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de URLs de Feedback</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f6fa;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 5px solid #28a745;
+            display: none;
+        }
+        
+        .url-output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .preview h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Generador de URLs de Feedback</h1>
+        
+        <form id="url-generator-form">
+            <div class="form-group">
+                <label for="candidate-name">Nombre del Candidato:</label>
+                <input type="text" id="candidate-name" placeholder="Ej: María García" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="position">Posición:</label>
+                <input type="text" id="position" placeholder="Ej: Desarrollador Frontend Senior" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="feedback-report">Reporte de Feedback (HTML procesado por ChatGPT):</label>
+                <textarea id="feedback-report" placeholder="Pega aquí el HTML del reporte generado por ChatGPT..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="feedback-url">URL del Sistema de Feedback:</label>
+                <input type="url" id="feedback-url" placeholder="https://tu-dominio.com/feedback-system.html" value="file:///ruta/a/tu/feedback-system.html">
+            </div>
+            
+            <button type="submit" class="btn">Generar URL Única</button>
+        </form>
+        
+        <div id="result" class="result">
+            <h3>✅ URL Generada Exitosamente</h3>
+            <p><strong>Candidato:</strong> <span id="result-candidate"></span></p>
+            <p><strong>Posición:</strong> <span id="result-position"></span></p>
+            <p><strong>URL única:</strong></p>
+            <div class="url-output" id="generated-url"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">Copiar URL</button>
+            
+            <div class="preview">
+                <h3>👀 Vista Previa del Reporte</h3>
+                <div id="report-preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('url-generator-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateFeedbackURL();
+        });
+
+        function generateFeedbackURL() {
+            const candidateName = document.getElementById('candidate-name').value;
+            const position = document.getElementById('position').value;
+            const feedbackReport = document.getElementById('feedback-report').value;
+            const baseURL = document.getElementById('feedback-url').value;
+            
+            // Generar ID único para el reporte
+            const reportId = 'report_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            
+            // Crear la URL con parámetros
+            const urlParams = new URLSearchParams({
+                reportId: reportId,
+                candidate: candidateName,
+                position: position
+            });
+            
+            const finalURL = `${baseURL}?${urlParams.toString()}`;
+            
+            // Simular guardado del reporte (en implementación real, lo guardarías en base de datos)
+            const reportData = {
+                id: reportId,
+                candidate: candidateName,
+                position: position,
+                html: feedbackReport,
+                created: new Date().toISOString()
+            };
+            
+            // Guardar en localStorage para demo
+            localStorage.setItem(reportId, JSON.stringify(reportData));
+            
+            // Mostrar resultado
+            showResult(candidateName, position, finalURL, feedbackReport);
+            
+            // Log para debugging
+            console.log('Reporte generado:', reportData);
+        }
+
+        function showResult(candidate, position, url, reportHTML) {
+            document.getElementById('result-candidate').textContent = candidate;
+            document.getElementById('result-position').textContent = position;
+            document.getElementById('generated-url').textContent = url;
+            document.getElementById('report-preview').innerHTML = reportHTML;
+            document.getElementById('result').style.display = 'block';
+            
+            // Scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const url = document.getElementById('generated-url').textContent;
+            navigator.clipboard.writeText(url).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copiado!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+            });
+        }
+
+        // Ejemplo pre-cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            const exampleReport = `<h2>🌟 Resumen General</h2>
+<p>María muestra un perfil sólido como <strong>Desarrolladora Frontend</strong>, con experiencia concreta en startups y empresas tecnológicas. Se destaca su capacidad para <strong>crear interfaces intuitivas, optimizar performance</strong> y trabajar en equipos ágiles. Maneja muy bien las tecnologías modernas y tiene una actitud proactiva hacia el aprendizaje continuo.</p>
+
+<h2>💪 Fortalezas</h2>
+<ul>
+<li><strong>Dominio técnico sólido:</strong> excelente manejo de React, TypeScript, y herramientas modernas de desarrollo.</li>
+<li><strong>Enfoque en UX:</strong> demuestra preocupación genuina por la experiencia del usuario final.</li>
+<li><strong>Pensamiento analítico:</strong> resuelve problemas de manera estructurada y eficiente.</li>
+<li><strong>Adaptabilidad:</strong> se integra bien en equipos diversos y abraza nuevas metodologías.</li>
+</ul>
+
+<h2>🔍 Oportunidades de Mejora</h2>
+<ul>
+<li><strong>Testing automatizado:</strong> profundizar en estrategias de testing integral (unit, integration, e2e).</li>
+<li><strong>Arquitectura escalable:</strong> expandir conocimientos en patrones de diseño para aplicaciones grandes.</li>
+<li><strong>Soft skills:</strong> desarrollar más confianza al presentar ideas técnicas a stakeholders no técnicos.</li>
+</ul>
+
+<h2>💡 Sugerencias</h2>
+<ol>
+<li><strong>Certificarse en testing</strong> con herramientas como Jest, Cypress o Playwright.</li>
+<li><strong>Liderar un proyecto frontend</strong> para ganar experiencia en arquitectura de aplicaciones complejas.</li>
+<li><strong>Practicar presentaciones técnicas</strong> para mejorar comunicación con equipos multidisciplinarios.</li>
+<li><strong>Contribuir a open source</strong> para exponerse a diferentes estilos de código y colaboración.</li>
+</ol>
+
+<p>👉 En resumen: María es una <strong>desarrolladora frontend competente con excelente potencial de crecimiento</strong>, ideal para equipos que valoren la calidad técnica y la colaboración efectiva.</p>`;
+
+            document.getElementById('feedback-report').value = exampleReport;
+        });
+    </script>
+</body>
+</html>
