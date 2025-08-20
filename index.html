@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback de Entrevista</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            min-height: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .question-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .question-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: #4facfe;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(79, 172, 254, 0.2);
+        }
+
+        .radio-option input, .checkbox-option input {
+            margin-right: 12px;
+            transform: scale(1.1);
+        }
+
+        .radio-option.selected, .checkbox-option.selected {
+            border-color: #4facfe;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .nps-scale {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .nps-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-height: 50px;
+        }
+
+        .nps-option:hover {
+            border-color: #4facfe;
+            transform: translateY(-2px);
+        }
+
+        .nps-option.selected {
+            border-color: #4facfe;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .nps-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .textarea-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 100px;
+            margin: 15px 0;
+            transition: border-color 0.3s ease;
+        }
+
+        .textarea-field:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .conditional-field {
+            margin-left: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            min-width: 200px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .report-content {
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .report-content h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 0 15px 0;
+            color: #2c3e50;
+            font-size: 1.4em;
+        }
+
+        .report-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .report-content ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .report-content li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .report-content strong {
+            color: #2c3e50;
+        }
+
+        .report-content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .success-animation {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .success-icon {
+            font-size: 4em;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e9ecef;
+            border-top: 2px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .scale-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scale-option:hover {
+            border-color: #4facfe;
+            transform: translateY(-2px);
+        }
+
+        .scale-option.selected {
+            border-color: #4facfe;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .scale-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .scale-label {
+            font-size: 0.8em;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .nps-scale {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .scale-5 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encuesta de la entrevista -->
+        <div id="interview-survey" class="screen">
+            <div class="header">
+                <h1>Encuesta de Entrevista</h1>
+                <p>Tu opinión nos ayuda a mejorar nuestro proceso</p>
+            </div>
+            <div class="content">
+                <!-- NPS -->
+                <div class="question-card">
+                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestro proceso de entrevistas a un amigo o colega?</h3>
+                    <div class="nps-scale" id="nps-scale">
+                        <!-- Se genera dinámicamente -->
+                    </div>
+                    <div class="nps-labels">
+                        <span>Muy improbable</span>
+                        <span>Muy probable</span>
+                    </div>
+                </div>
+
+                <!-- Problemas técnicos -->
+                <div class="question-card">
+                    <h3>¿Experimentaste algún problema técnico durante la entrevista?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="technicalProblems" value="no">
+                            <span>No, todo funcionó correctamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="technicalProblems" value="yes">
+                            <span>Sí, tuve algunos problemas técnicos</span>
+                        </label>
+                    </div>
+                    <div id="technical-details" class="conditional-field hidden">
+                        <label for="technical-description"><strong>¿Podrías contarnos qué problemas experimentaste?</strong></label>
+                        <textarea class="textarea-field" name="technicalDescription" placeholder="Describe los problemas técnicos que experimentaste..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Conversación natural -->
+                <div class="question-card">
+                    <h3>¿Qué tan natural te pareció la conversación?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="conversationNatural" value="si">
+                            <span>Sí, se sintió muy natural</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="conversationNatural" value="no">
+                            <span>No, se sintió forzada o artificial</span>
+                        </label>
+                    </div>
+                    <div id="conversation-details" class="conditional-field hidden">
+                        <label for="conversation-why"><strong>¿Por qué no te pareció natural?</strong></label>
+                        <textarea class="textarea-field" name="conversationWhy" placeholder="Explícanos qué hizo que la conversación no se sintiera natural..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Experiencia profesional -->
+                <div class="question-card">
+                    <h3>¿Sentiste que pudiste expresar tu experiencia profesional en profundidad?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="si">
+                            <span>Sí, pude expresarme completamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="parcialmente">
+                            <span>Parcialmente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="no">
+                            <span>No, no pude expresarme adecuadamente</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Inglés -->
+                <div class="question-card">
+                    <h3>¿Considerás que las preguntas en inglés reflejaron bien tu nivel de idioma?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="englishReflection" value="si">
+                            <span>Sí, reflejaron mi nivel correctamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="englishReflection" value="no">
+                            <span>No, no reflejaron mi nivel adecuadamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="englishReflection" value="na">
+                            <span>No aplica / No hubo preguntas en inglés</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div class="question-card">
+                    <h3>¿Te gustaría recibir feedback sobre tu entrevista?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="wantsFeedback" value="yes">
+                            <span>Sí, me gustaría recibir feedback detallado</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="wantsFeedback" value="no">
+                            <span>No, prefiero no recibir feedback</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Comentario adicional -->
+                <div class="question-card">
+                    <h3>Comentario adicional (opcional)</h3>
+                    <textarea class="textarea-field" name="additionalComment" placeholder="Comparte cualquier comentario adicional sobre tu experiencia de entrevista..."></textarea>
+                </div>
+
+                <button class="btn" onclick="submitInterviewSurvey()" disabled>Enviar Encuesta</button>
+            </div>
+        </div>
+
+        <!-- Agradecimiento sin feedback -->
+        <div id="thank-you-no-feedback" class="screen hidden">
+            <div class="header">
+                <h1>¡Gracias!</h1>
+                <p>Hemos registrado tu preferencia</p>
+            </div>
+            <div class="content">
+                <div class="success-animation">
+                    <div class="success-icon">✓</div>
+                    <h2 style="color: #333; margin-bottom: 20px;">Encuesta completada</h2>
+                    <p style="color: #666; font-size: 1.1em; line-height: 1.6;">
+                        Agradecemos tu participación en nuestro proceso de selección. 
+                        Tu tiempo y esfuerzo son muy valiosos para nosotros.
+                    </p>
+                    <p style="color: #666; margin-top: 20px;">
+                        Nos pondremos en contacto contigo pronto con los próximos pasos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte de feedback -->
+        <div id="feedback-report" class="screen hidden">
+            <div class="header">
+                <h1>Tu Reporte de Feedback</h1>
+                <p>Observaciones detalladas sobre tu entrevista</p>
+            </div>
+            <div class="content">
+                <div class="question-card">
+                    <div class="report-content" id="report-content">
+                        <!-- El contenido del reporte se carga aquí -->
+                    </div>
+                </div>
+                
+                <!-- Encuesta sobre el feedback -->
+                <div class="question-card">
+                    <h2>Evaluación del Feedback</h2>
+                    
+                    <!-- Claridad -->
+                    <div style="margin-bottom: 25px;">
+                        <h3>¿El feedback fue claro y fácil de entender?</h3>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="feedbackClarity" value="si">
+                                <span>Sí, muy claro y fácil de entender</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="feedbackClarity" value="parcialmente">
+                                <span>Parcialmente, algunas partes no quedaron claras</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="feedbackClarity" value="no">
+                                <span>No, fue confuso o difícil de entender</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Utilidad -->
+                    <div style="margin-bottom: 25px;">
+                        <h3>¿Qué tan útil te resultó para entender fortalezas y áreas de mejora?</h3>
+                        <div class="scale-5">
+                            <div class="scale-option" data-value="1">
+                                <div class="scale-number">1</div>
+                                <div class="scale-label">Nada útil</div>
+                            </div>
+                            <div class="scale-option" data-value="2">
+                                <div class="scale-number">2</div>
+                                <div class="scale-label">Poco útil</div>
+                            </div>
+                            <div class="scale-option" data-value="3">
+                                <div class="scale-number">3</div>
+                                <div class="scale-label">Neutral</div>
+                            </div>
+                            <div class="scale-option" data-value="4">
+                                <div class="scale-number">4</div>
+                                <div class="scale-label">Útil</div>
+                            </div>
+                            <div class="scale-option" data-value="5">
+                                <div class="scale-number">5</div>
+                                <div class="scale-label">Muy útil</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incluir más -->
+                    <div style="margin-bottom: 25px;">
+                        <h3>¿Qué te gustaría que incluyamos más en los reportes?</h3>
+                        <textarea class="textarea-field" name="includeMore" placeholder="Comparte qué información adicional te gustaría ver en futuros reportes..."></textarea>
+                    </div>
+
+                    <!-- Nivel de detalle -->
+                    <div style="margin-bottom: 25px;">
+                        <h3>¿El nivel de detalle fue…?</h3>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="detailLevel" value="superficial">
+                                <span>Superficial - Necesitaba más detalles</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="detailLevel" value="adecuado">
+                                <span>Adecuado - El nivel correcto de detalle</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="detailLevel" value="extenso">
+                                <span>Demasiado extenso - Muy detallado</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Faltó -->
+                    <div style="margin-bottom: 25px;">
+                        <h3>¿Qué faltó en el feedback que te hubiera gustado ver?</h3>
+                        <textarea class="textarea-field" name="whatMissing" placeholder="Describe qué información o aspectos te hubiera gustado que se incluyeran..."></textarea>
+                    </div>
+
+                    <button class="btn" onclick="submitFeedbackSurvey()" disabled>Enviar Evaluación</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agradecimiento final -->
+        <div id="final-thank-you" class="screen hidden">
+            <div class="header">
+                <h1>¡Excelente!</h1>
+                <p>Tu feedback ha sido registrado</p>
+            </div>
+            <div class="content">
+                <div class="success-animation">
+                    <div class="success-icon">🎉</div>
+                    <h2 style="color: #333; margin-bottom: 20px;">¡Gracias por tu tiempo!</h2>
+                    <p style="color: #666; font-size: 1.1em; line-height: 1.6;">
+                        Tu evaluación nos ayuda a mejorar continuamente nuestro proceso de feedback 
+                        y brindar una mejor experiencia a futuros candidatos.
+                    </p>
+                    <p style="color: #666; margin-top: 20px;">
+                        Estaremos en contacto contigo pronto.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="hidden" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Guardando respuestas...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Reporte de feedback de ejemplo (viene de tu procesamiento con ChatGPT)
+        const sampleFeedbackReport = `
+<h2>🌟 Resumen General</h2>
+<p>Siro muestra un perfil sólido como <strong>Product Manager</strong>, con experiencia concreta en startups y empresas tecnológicas, especialmente en los sectores de HR Tech y marketplaces de talento. Se destaca su capacidad para <strong>definir roadmaps, liderar ceremonias ágiles, analizar métricas de producto</strong> y tomar decisiones estratégicas que impactan en la conversión y el engagement de usuarios. Además, maneja inglés funcional y logra expresarse de manera clara en situaciones de entrevista.</p>
+
+<h2>💪 Fortalezas</h2>
+<ul>
+<li><strong>Visión integral de producto:</strong> combina interés por la estrategia con cercanía a la ejecución y el diseño.</li>
+<li><strong>Impacto medible:</strong> logró reducir drásticamente el churn en Seeds implementando mejoras en el funnel de conversión.</li>
+<li><strong>Innovación y resolución de problemas:</strong> desarrolló soluciones creativas como la extensión de Chrome en Avature y el autocompletado de perfiles en Seeds.</li>
+<li><strong>Capacidad de coordinación:</strong> aunque trabaja en equipos autogestionados, demostró liderazgo en la toma de decisiones y en guiar al equipo hacia objetivos claros.</li>
+<li><strong>Apertura a industrias y formatos de empresa:</strong> predisposición tanto para startups como multinacionales.</li>
+</ul>
+
+<h2>🔍 Oportunidades de Mejora</h2>
+<ul>
+<li><strong>Profundizar en storytelling de logros:</strong> algunos logros se describieron con detalle técnico, pero podría reforzarse la forma de comunicar el <strong>impacto estratégico y de negocio</strong> (ej. métricas de ROI, impacto en clientes).</li>
+<li><strong>Claridad y estructura al comunicar en inglés:</strong> maneja el idioma, pero en contextos más exigentes podría reforzar la <strong>precisión gramatical y la fluidez</strong>.</li>
+<li><strong>Rol de liderazgo formal:</strong> si bien lidera equipos de producto bajo frameworks ágiles, podría destacar ejemplos más concretos de <strong>gestión de stakeholders</strong> y <strong>alineación transversal con distintas áreas</strong>.</li>
+</ul>
+
+<h2>💡 Sugerencias</h2>
+<ol>
+<li><strong>Preparar casos de impacto con métricas claras</strong> (ej. "redujimos el churn un 60%, lo que aumentó en X% la base de talentos validados"), para fortalecer la narrativa en entrevistas.</li>
+<li><strong>Practicar entrevistas técnicas en inglés</strong>, especialmente en preguntas abiertas, para ganar seguridad y evitar repeticiones.</li>
+<li><strong>Resaltar habilidades de liderazgo transversal</strong>, mostrando cómo coordina con marketing, ventas o customer experience, además del equipo técnico.</li>
+<li><strong>Conectar los logros con objetivos de negocio</strong>, no solo desde lo técnico, para reforzar la visión estratégica.</li>
+</ol>
+
+<p>👉 En resumen: Siro es un <strong>Product Manager con experiencia sólida, orientación a resultados y capacidad de innovación</strong>, que puede potenciar aún más su perfil al mejorar la forma en que comunica impacto, especialmente en inglés y frente a stakeholders de negocio.</p>
+        `;
+
+        // Estado de respuestas
+        let responses = {
+            candidateId: generateUniqueId(),
+            timestamp: new Date().toISOString(),
+            // Encuesta inicial
+            nps: null,
+            technicalProblems: null,
+            technicalDescription: null,
+            conversationNatural: null,
+            conversationWhy: null,
+            professionalExpression: null,
+            englishReflection: null,
+            wantsFeedback: null,
+            additionalComment: null,
+            // Encuesta de feedback
+            feedbackClarity: null,
+            feedbackUtility: null,
+            includeMore: null,
+            detailLevel: null,
+            whatMissing: null
+        };
+
+        function generateUniqueId() {
+            return 'candidate_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeComponents();
+            setupEventListeners();
+        });
+
+        function initializeComponents() {
+            // Generar escala NPS
+            const npsContainer = document.getElementById('nps-scale');
+            for (let i = 0; i <= 10; i++) {
+                const option = document.createElement('div');
+                option.className = 'nps-option';
+                option.textContent = i;
+                option.addEventListener('click', () => selectNPS(i, option));
+                npsContainer.appendChild(option);
+            }
+
+            // Cargar reporte de feedback
+            document.getElementById('report-content').innerHTML = sampleFeedbackReport;
+        }
+
+        function setupEventListeners() {
+            // Radio buttons
+            setupRadioListeners('technicalProblems', showTechnicalDetails);
+            setupRadioListeners('conversationNatural', showConversationDetails);
+            setupRadioListeners('professionalExpression');
+            setupRadioListeners('englishReflection');
+            setupRadioListeners('wantsFeedback', checkInterviewSurveyComplete);
+            setupRadioListeners('feedbackClarity', checkFeedbackSurveyComplete);
+            setupRadioListeners('detailLevel', checkFeedbackSurveyComplete);
+
+            // Scale 1-5 para utilidad
+            document.querySelectorAll('.scale-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.scale-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    responses.feedbackUtility = this.dataset.value;
+                    checkFeedbackSurveyComplete();
+                });
+            });
+
+            // Textareas
+            document.querySelector('textarea[name="additionalComment"]').addEventListener('input', function() {
+                responses.additionalComment = this.value;
+            });
+
+            document.querySelector('textarea[name="includeMore"]').addEventListener('input', function() {
+                responses.includeMore = this.value;
+                checkFeedbackSurveyComplete();
+            });
+
+            document.querySelector('textarea[name="whatMissing"]').addEventListener('input', function() {
+                responses.whatMissing = this.value;
+                checkFeedbackSurveyComplete();
+            });
+        }
+
+        function setupRadioListeners(name, callback = null) {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateRadioStyles(this);
+                    responses[name] = this.value;
+                    if (callback) callback();
+                    checkInterviewSurveyComplete();
+                });
+            });
+        }
+
+        function selectNPS(value, element) {
+            document.querySelectorAll('.nps-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            responses.nps = value;
+            checkInterviewSurveyComplete();
+        }
+
+        function updateRadioStyles(selectedRadio) {
+            selectedRadio.closest('.radio-group').querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            selectedRadio.closest('.radio-option').classList.add('selected');
+        }
+
+        function showTechnicalDetails() {
+            const details = document.getElementById('technical-details');
+            if (responses.technicalProblems === 'yes') {
+                details.classList.remove('hidden');
+                details.querySelector('textarea').addEventListener('input', function() {
+                    responses.technicalDescription = this.value;
+                });
+            } else {
+                details.classList.add('hidden');
+                responses.technicalDescription = null;
+            }
+        }
+
+        function showConversationDetails() {
+            const details = document.getElementById('conversation-details');
+            if (responses.conversationNatural === 'no') {
+                details.classList.remove('hidden');
+                details.querySelector('textarea').addEventListener('input', function() {
+                    responses.conversationWhy = this.value;
+                });
+            } else {
+                details.classList.add('hidden');
+                responses.conversationWhy = null;
+            }
+        }
+
+        function checkInterviewSurveyComplete() {
+            const required = ['nps', 'technicalProblems', 'conversationNatural', 'professionalExpression', 'englishReflection', 'wantsFeedback'];
+            const isComplete = required.every(field => responses[field] !== null);
+            document.querySelector('#interview-survey .btn').disabled = !isComplete;
+        }
+
+        function checkFeedbackSurveyComplete() {
+            const required = ['feedbackClarity', 'feedbackUtility', 'detailLevel'];
+            const isComplete = required.every(field => responses[field] !== null);
+            document.querySelector('#feedback-report .btn').disabled = !isComplete;
+        }
+
+        async function submitInterviewSurvey() {
+            showLoading(true);
+            
+            try {
+                await saveToGoogleSheets({
+                    ...responses,
+                    surveyType: 'interview_survey',
+                    timestamp: new Date().toISOString()
+                });
+
+                if (responses.wantsFeedback === 'yes') {
+                    showScreen('feedback-report');
+                } else {
+                    showScreen('thank-you-no-feedback');
+                }
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                alert('Hubo un error al procesar tu respuesta. Por favor intenta de nuevo.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function submitFeedbackSurvey() {
+            showLoading(true);
+            
+            try {
+                await saveToGoogleSheets({
+                    ...responses,
+                    surveyType: 'feedback_evaluation',
+                    timestamp: new Date().toISOString()
+                });
+
+                showScreen('final-thank-you');
+            } catch (error) {
+                console.error('Error al guardar evaluación:', error);
+                alert('Hubo un error al procesar tu evaluación. Por favor intenta de nuevo.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function saveToGoogleSheets(data) {
+            // Simular latencia de red
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            console.log('Datos guardados en Google Sheets:', data);
+            
+            // Aquí va tu URL real de Google Apps Script
+            // const response = await fetch('TU_URL_DE_GOOGLE_APPS_SCRIPT', {
+            //     method: 'POST',
+            //     mode: 'cors',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(data)
+            // });
+            // return response.json();
+            
+            return { success: true, id: Math.random().toString(36) };
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loading-overlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Función para cargar reporte personalizado (para uso externo)
+        function loadCustomReport(reportHTML) {
+            document.getElementById('report-content').innerHTML = reportHTML;
+        }
+
+        // Función para generar URL única (para uso externo)
+        function generateUniqueURL(reportHTML = null) {
+            const reportId = 'report_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            const baseURL = window.location.origin + window.location.pathname;
+            
+            if (reportHTML) {
+                // En implementación real, guardarías esto en una base de datos
+                sessionStorage.setItem(reportId, reportHTML);
+            }
+            
+            return `${baseURL}?reportId=${reportId}`;
+        }
+
+        // Cargar reporte desde URL si existe
+        function loadReportFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reportId = urlParams.get('reportId');
+            
+            if (reportId) {
+                const savedReport = sessionStorage.getItem(reportId);
+                if (savedReport) {
+                    loadCustomReport(savedReport);
+                }
+                responses.reportId = reportId;
+            }
+        }
+
+        // Cargar reporte al inicializar
+        loadReportFromURL();
+
+        // Exponer funciones globalmente
+        window.feedbackSystem = {
+            generateUniqueURL,
+            loadCustomReport,
+            getCurrentResponses: () => responses
+        };
+    </script>
+</body>
+</html>
