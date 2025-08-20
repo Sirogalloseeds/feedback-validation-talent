@@ -139,7 +139,7 @@
             
             <div class="form-group">
                 <label for="feedback-url">URL del Sistema de Feedback:</label>
-                <input type="url" id="feedback-url" placeholder="https://tu-dominio.com/feedback-system.html" value="file:///ruta/a/tu/feedback-system.html">
+                <input type="url" id="feedback-url" placeholder="https://tu-usuario.github.io/feedback-system/" value="">
             </div>
             
             <button type="submit" class="btn">Generar URL Única</button>
@@ -229,8 +229,21 @@
             });
         }
 
-        // Ejemplo pre-cargado
+        // Auto-detectar URL base si estamos en GitHub Pages
         document.addEventListener('DOMContentLoaded', function() {
+            const currentURL = window.location.href;
+            const isGitHubPages = currentURL.includes('github.io');
+            
+            if (isGitHubPages) {
+                // Extraer la URL base de GitHub Pages
+                const baseURL = currentURL.replace('/generator.html', '/');
+                document.getElementById('feedback-url').value = baseURL;
+            } else if (currentURL.includes('localhost') || currentURL.includes('127.0.0.1')) {
+                // Para servidor local
+                const baseURL = currentURL.replace('/generator.html', '/');
+                document.getElementById('feedback-url').value = baseURL;
+            }
+            
             const exampleReport = `<h2>🌟 Resumen General</h2>
 <p>María muestra un perfil sólido como <strong>Desarrolladora Frontend</strong>, con experiencia concreta en startups y empresas tecnológicas. Se destaca su capacidad para <strong>crear interfaces intuitivas, optimizar performance</strong> y trabajar en equipos ágiles. Maneja muy bien las tecnologías modernas y tiene una actitud proactiva hacia el aprendizaje continuo.</p>
 

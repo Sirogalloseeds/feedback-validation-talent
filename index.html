@@ -324,6 +324,16 @@
             text-align: center;
         }
 
+        .custom-report-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #856404;
+        }
+
         @media (max-width: 768px) {
             .nps-scale {
                 grid-template-columns: repeat(6, 1fr);
@@ -361,6 +371,12 @@
                 <p>Tu opinión nos ayuda a mejorar nuestro proceso</p>
             </div>
             <div class="content">
+                <!-- Info sobre reporte personalizado -->
+                <div id="custom-report-info" class="custom-report-notice hidden">
+                    <strong>📋 Reporte personalizado cargado</strong><br>
+                    Candidato: <span id="candidate-info"></span> | Posición: <span id="position-info"></span>
+                </div>
+
                 <!-- NPS -->
                 <div class="question-card">
                     <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestro proceso de entrevistas a un amigo o colega?</h3>
@@ -625,42 +641,45 @@
     </div>
 
     <script>
-        // Reporte de feedback de ejemplo (viene de tu procesamiento con ChatGPT)
-        const sampleFeedbackReport = `
+        // Reporte de feedback por defecto
+        const defaultFeedbackReport = `
 <h2>🌟 Resumen General</h2>
-<p>Siro muestra un perfil sólido como <strong>Product Manager</strong>, con experiencia concreta en startups y empresas tecnológicas, especialmente en los sectores de HR Tech y marketplaces de talento. Se destaca su capacidad para <strong>definir roadmaps, liderar ceremonias ágiles, analizar métricas de producto</strong> y tomar decisiones estratégicas que impactan en la conversión y el engagement de usuarios. Además, maneja inglés funcional y logra expresarse de manera clara en situaciones de entrevista.</p>
+<p>Demostraste un perfil sólido durante la entrevista, con buena comunicación y conocimientos técnicos relevantes. Se nota tu experiencia y capacidad para enfrentar desafíos profesionales.</p>
 
 <h2>💪 Fortalezas</h2>
 <ul>
-<li><strong>Visión integral de producto:</strong> combina interés por la estrategia con cercanía a la ejecución y el diseño.</li>
-<li><strong>Impacto medible:</strong> logró reducir drásticamente el churn en Seeds implementando mejoras en el funnel de conversión.</li>
-<li><strong>Innovación y resolución de problemas:</strong> desarrolló soluciones creativas como la extensión de Chrome en Avature y el autocompletado de perfiles en Seeds.</li>
-<li><strong>Capacidad de coordinación:</strong> aunque trabaja en equipos autogestionados, demostró liderazgo en la toma de decisiones y en guiar al equipo hacia objetivos claros.</li>
-<li><strong>Apertura a industrias y formatos de empresa:</strong> predisposición tanto para startups como multinacionales.</li>
+<li><strong>Comunicación clara:</strong> expresaste tus ideas de manera estructurada y comprensible.</li>
+<li><strong>Experiencia técnica:</strong> demostraste conocimientos sólidos en tu área de especialización.</li>
+<li><strong>Actitud positiva:</strong> mostraste entusiasmo y ganas de aprender.</li>
+<li><strong>Capacidad de análisis:</strong> abordaste los problemas de manera lógica y estructurada.</li>
 </ul>
 
 <h2>🔍 Oportunidades de Mejora</h2>
 <ul>
-<li><strong>Profundizar en storytelling de logros:</strong> algunos logros se describieron con detalle técnico, pero podría reforzarse la forma de comunicar el <strong>impacto estratégico y de negocio</strong> (ej. métricas de ROI, impacto en clientes).</li>
-<li><strong>Claridad y estructura al comunicar en inglés:</strong> maneja el idioma, pero en contextos más exigentes podría reforzar la <strong>precisión gramatical y la fluidez</strong>.</li>
-<li><strong>Rol de liderazgo formal:</strong> si bien lidera equipos de producto bajo frameworks ágiles, podría destacar ejemplos más concretos de <strong>gestión de stakeholders</strong> y <strong>alineación transversal con distintas áreas</strong>.</li>
+<li><strong>Ejemplos específicos:</strong> podés enriquecer tus respuestas con más casos concretos de tu experiencia.</li>
+<li><strong>Preguntas al equipo:</strong> mostrar más curiosidad sobre la empresa, el equipo y el rol específico.</li>
+<li><strong>Profundidad técnica:</strong> en algunas respuestas podrías haber profundizado más en los aspectos técnicos.</li>
 </ul>
 
 <h2>💡 Sugerencias</h2>
 <ol>
-<li><strong>Preparar casos de impacto con métricas claras</strong> (ej. "redujimos el churn un 60%, lo que aumentó en X% la base de talentos validados"), para fortalecer la narrativa en entrevistas.</li>
-<li><strong>Practicar entrevistas técnicas en inglés</strong>, especialmente en preguntas abiertas, para ganar seguridad y evitar repeticiones.</li>
-<li><strong>Resaltar habilidades de liderazgo transversal</strong>, mostrando cómo coordina con marketing, ventas o customer experience, además del equipo técnico.</li>
-<li><strong>Conectar los logros con objetivos de negocio</strong>, no solo desde lo técnico, para reforzar la visión estratégica.</li>
+<li><strong>Preparar casos de éxito</strong> con métricas específicas y resultados medibles para futuras entrevistas.</li>
+<li><strong>Investigar más sobre la empresa</strong> y preparar preguntas que demuestren interés genuino.</li>
+<li><strong>Practicar storytelling</strong> para comunicar mejor tus logros y experiencias.</li>
+<li><strong>Preparar ejemplos STAR</strong> (Situación, Tarea, Acción, Resultado) para respuestas comportamentales.</li>
 </ol>
 
-<p>👉 En resumen: Siro es un <strong>Product Manager con experiencia sólida, orientación a resultados y capacidad de innovación</strong>, que puede potenciar aún más su perfil al mejorar la forma en que comunica impacto, especialmente en inglés y frente a stakeholders de negocio.</p>
+<p>👉 En resumen: <strong>Perfil prometedor con buenas bases técnicas y comunicacionales</strong>, con potencial para seguir creciendo en el rol y la organización.</p>
         `;
 
         // Estado de respuestas
         let responses = {
             candidateId: generateUniqueId(),
             timestamp: new Date().toISOString(),
+            // Datos del candidato (si vienen en URL)
+            candidateName: null,
+            position: null,
+            reportId: null,
             // Encuesta inicial
             nps: null,
             technicalProblems: null,
@@ -684,9 +703,58 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            loadParametersFromURL();
             initializeComponents();
             setupEventListeners();
         });
+
+        function loadParametersFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Cargar parámetros de la URL
+            responses.reportId = urlParams.get('reportId');
+            responses.candidateName = urlParams.get('candidate');
+            responses.position = urlParams.get('position');
+
+            // Mostrar info del candidato si existe
+            if (responses.candidateName || responses.position) {
+                const infoDiv = document.getElementById('custom-report-info');
+                document.getElementById('candidate-info').textContent = responses.candidateName || 'No especificado';
+                document.getElementById('position-info').textContent = responses.position || 'No especificado';
+                infoDiv.classList.remove('hidden');
+            }
+
+            // Cargar reporte personalizado si existe
+            if (responses.reportId) {
+                loadCustomReportFromStorage();
+            }
+        }
+
+        function loadCustomReportFromStorage() {
+            // Intentar cargar desde localStorage (persistente)
+            let reportData = localStorage.getItem(responses.reportId);
+            
+            if (!reportData) {
+                // Intentar cargar desde sessionStorage (temporal)
+                reportData = sessionStorage.getItem(responses.reportId);
+            }
+
+            if (reportData) {
+                try {
+                    const data = JSON.parse(reportData);
+                    if (data.html) {
+                        document.getElementById('report-content').innerHTML = data.html;
+                        console.log('✅ Reporte personalizado cargado');
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error al cargar reporte personalizado, usando reporte por defecto');
+                    document.getElementById('report-content').innerHTML = defaultFeedbackReport;
+                }
+            } else {
+                console.log('📄 Usando reporte por defecto');
+                document.getElementById('report-content').innerHTML = defaultFeedbackReport;
+            }
+        }
 
         function initializeComponents() {
             // Generar escala NPS
@@ -699,8 +767,10 @@
                 npsContainer.appendChild(option);
             }
 
-            // Cargar reporte de feedback
-            document.getElementById('report-content').innerHTML = sampleFeedbackReport;
+            // Cargar reporte de feedback por defecto si no hay uno personalizado
+            if (!document.getElementById('report-content').innerHTML.trim()) {
+                document.getElementById('report-content').innerHTML = defaultFeedbackReport;
+            }
         }
 
         function setupEventListeners() {
@@ -848,7 +918,7 @@
             // Simular latencia de red
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            console.log('Datos guardados en Google Sheets:', data);
+            console.log('📊 Datos que se guardarían en Google Sheets:', data);
             
             // Aquí va tu URL real de Google Apps Script
             // const response = await fetch('TU_URL_DE_GOOGLE_APPS_SCRIPT', {
@@ -880,47 +950,62 @@
             }
         }
 
-        // Función para cargar reporte personalizado (para uso externo)
-        function loadCustomReport(reportHTML) {
-            document.getElementById('report-content').innerHTML = reportHTML;
-        }
-
-        // Función para generar URL única (para uso externo)
-        function generateUniqueURL(reportHTML = null) {
-            const reportId = 'report_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-            const baseURL = window.location.origin + window.location.pathname;
-            
-            if (reportHTML) {
-                // En implementación real, guardarías esto en una base de datos
-                sessionStorage.setItem(reportId, reportHTML);
-            }
-            
-            return `${baseURL}?reportId=${reportId}`;
-        }
-
-        // Cargar reporte desde URL si existe
-        function loadReportFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const reportId = urlParams.get('reportId');
-            
-            if (reportId) {
-                const savedReport = sessionStorage.getItem(reportId);
-                if (savedReport) {
-                    loadCustomReport(savedReport);
-                }
-                responses.reportId = reportId;
-            }
-        }
-
-        // Cargar reporte al inicializar
-        loadReportFromURL();
-
-        // Exponer funciones globalmente
+        // Sistema de URLs únicas mejorado
         window.feedbackSystem = {
-            generateUniqueURL,
-            loadCustomReport,
-            getCurrentResponses: () => responses
+            generateUniqueURL: function(reportHTML, candidateName = '', position = '') {
+                const reportId = 'report_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                const baseURL = window.location.origin + window.location.pathname;
+                
+                // Guardar reporte en localStorage (persistente)
+                if (reportHTML) {
+                    const reportData = {
+                        id: reportId,
+                        html: reportHTML,
+                        candidate: candidateName,
+                        position: position,
+                        created: new Date().toISOString()
+                    };
+                    localStorage.setItem(reportId, JSON.stringify(reportData));
+                    
+                    // También en sessionStorage como backup
+                    sessionStorage.setItem(reportId, JSON.stringify(reportData));
+                }
+                
+                // Construir URL con parámetros
+                const params = new URLSearchParams({
+                    reportId: reportId
+                });
+                
+                if (candidateName) params.append('candidate', candidateName);
+                if (position) params.append('position', position);
+                
+                return `${baseURL}?${params.toString()}`;
+            },
+            
+            loadCustomReport: function(reportHTML) {
+                const reportContainer = document.getElementById('report-content');
+                if (reportContainer) {
+                    reportContainer.innerHTML = reportHTML;
+                }
+            },
+            
+            getCurrentResponses: function() {
+                return responses;
+            },
+            
+            // Función helper para obtener URL base correcta
+            getBaseURL: function() {
+                return window.location.origin + window.location.pathname;
+            }
         };
+
+        // Log de información del sistema al cargar
+        console.log('🚀 Sistema de Feedback iniciado');
+        console.log('📍 URL base:', window.feedbackSystem.getBaseURL());
+        console.log('🆔 ID del candidato:', responses.candidateId);
+        if (responses.reportId) {
+            console.log('📋 Report ID:', responses.reportId);
+        }
     </script>
 </body>
 </html>
