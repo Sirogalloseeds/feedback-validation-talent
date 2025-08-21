@@ -1241,41 +1241,40 @@
             try {
                 console.log('🔍 Verificando si ya completó la encuesta...');
                 
-                // Método 1: Verificar por reportId en localStorage
+                // Método 1: Verificar por reportId específico en localStorage
                 if (responses.reportId) {
                     const completionKey = `completed_${responses.reportId}`;
                     const localCompletion = localStorage.getItem(completionKey);
                     if (localCompletion) {
                         const completionData = JSON.parse(localCompletion);
-                        console.log('🚫 Encuesta ya completada (localStorage):', completionData);
+                        console.log('🚫 Encuesta ya completada (reportId específico):', completionData);
                         return {
                             isCompleted: true,
-                            method: 'Almacenamiento local del navegador',
+                            method: 'URL específica ya utilizada',
                             timestamp: completionData.timestamp,
                             data: completionData
                         };
                     }
                 }
                 
-                // Método 2: Verificar fingerprint del navegador
-                const fingerprint = await generateBrowserFingerprint();
-                const fingerprintKey = `fp_completed_${fingerprint}`;
-                const fpCompletion = localStorage.getItem(fingerprintKey);
-                if (fpCompletion) {
-                    const completionData = JSON.parse(fpCompletion);
-                    console.log('🚫 Encuesta ya completada (fingerprint):', completionData);
-                    return {
-                        isCompleted: true,
-                        method: 'Huella digital del navegador',
-                        timestamp: completionData.timestamp,
-                        data: completionData
-                    };
+                // Método 2: Verificar fingerprint SOLO para el reportId específico
+                if (responses.reportId) {
+                    const fingerprint = await generateBrowserFingerprint();
+                    const fingerprintKey = `fp_${responses.reportId}_${fingerprint}`;
+                    const fpCompletion = localStorage.getItem(fingerprintKey);
+                    if (fpCompletion) {
+                        const completionData = JSON.parse(fpCompletion);
+                        console.log('🚫 Encuesta ya completada (fingerprint + reportId):', completionData);
+                        return {
+                            isCompleted: true,
+                            method: 'Este dispositivo ya completó esta encuesta específica',
+                            timestamp: completionData.timestamp,
+                            data: completionData
+                        };
+                    }
                 }
                 
-                // Método 3: Verificar en Google Sheets (opcional - requiere configuración adicional)
-                // Para implementar esto necesitarías una función en Google Apps Script que busque duplicados
-                
-                console.log('✅ No se encontraron respuestas previas');
+                console.log('✅ No se encontraron respuestas previas para este reporte específico');
                 return { isCompleted: false };
                 
             } catch (error) {
@@ -1287,6 +1286,7 @@
 
         async function generateBrowserFingerprint() {
             // Generar fingerprint único basado en características del navegador
+            // PERO específico para este reportId
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             ctx.textBaseline = 'top';
@@ -1300,7 +1300,7 @@
                 screenResolution: `${screen.width}x${screen.height}`,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 canvas: canvas.toDataURL(),
-                reportId: responses.reportId // Incluir reportId para mayor especificidad
+                // NO incluir reportId en el hash para poder reutilizar el navegador
             };
             
             // Crear hash simple
@@ -1328,19 +1328,21 @@
                     ...additionalData
                 };
                 
-                // Marcar por reportId
+                // Marcar por reportId específico (principal)
                 if (responses.reportId) {
                     const completionKey = `completed_${responses.reportId}`;
                     localStorage.setItem(completionKey, JSON.stringify(completionData));
-                    console.log('✅ Marcado como completado (reportId):', completionKey);
+                    console.log('✅ Marcado como completado (reportId específico):', completionKey);
                 }
                 
-                // Marcar por fingerprint
-                generateBrowserFingerprint().then(fingerprint => {
-                    const fingerprintKey = `fp_completed_${fingerprint}`;
-                    localStorage.setItem(fingerprintKey, JSON.stringify(completionData));
-                    console.log('✅ Marcado como completado (fingerprint):', fingerprintKey);
-                });
+                // Marcar por fingerprint + reportId (backup)
+                if (responses.reportId) {
+                    generateBrowserFingerprint().then(fingerprint => {
+                        const fingerprintKey = `fp_${responses.reportId}_${fingerprint}`;
+                        localStorage.setItem(fingerprintKey, JSON.stringify(completionData));
+                        console.log('✅ Marcado como completado (fingerprint + reportId):', fingerprintKey);
+                    });
+                }
                 
                 // Actualizar estado interno
                 responses.isCompleted = true;
