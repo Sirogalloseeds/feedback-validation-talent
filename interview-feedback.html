@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback de Entrevista con IA - Seeds</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            max-width: 900px;
+            width: 100%;
+            min-height: 600px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .seeds-logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            filter: brightness(0) invert(1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 40px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .question-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 28px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .question-card h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.25em;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.2s ease;
+            background: #f9fafb;
+            margin: 16px 0;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #10b981;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+            transform: translateY(-1px);
+        }
+
+        .radio-option input, .checkbox-option input {
+            margin-right: 14px;
+            margin-top: 2px;
+            transform: scale(1.2);
+            accent-color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .radio-option.selected, .checkbox-option.selected {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .nps-scale {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .nps-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 8px;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            min-height: 50px;
+            font-size: 1.1em;
+        }
+
+        .nps-option:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+            transform: translateY(-2px);
+        }
+
+        .nps-option.selected {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .nps-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.875em;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .textarea-field {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 120px;
+            margin: 16px 0;
+            transition: border-color 0.2s ease;
+            background: #f9fafb;
+        }
+
+        .textarea-field:focus {
+            outline: none;
+            border-color: #10b981;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .conditional-field {
+            margin-left: 24px;
+            margin-top: 16px;
+            padding: 20px;
+            background: #fef3c7;
+            border-radius: 10px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: block;
+            margin: 32px auto 0;
+            min-width: 200px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .success-animation {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 24px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .nps-categories {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .nps-scale {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 6px;
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 28px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 24px 20px;
+            }
+
+            .question-card {
+                padding: 24px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nps-scale {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .nps-option {
+                padding: 10px 4px;
+                font-size: 1em;
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encuesta principal -->
+        <div id="survey-screen">
+            <div class="header">
+                <img src="seeds-logo.png" alt="Seeds" class="seeds-logo">
+                <h1>Feedback de Entrevista con IA</h1>
+                <p>Tu opinión nos ayuda a mejorar continuamente</p>
+            </div>
+            <div class="content">
+                <!-- Datos personales -->
+                <div class="question-card">
+                    <h3>Información de contacto</h3>
+                    <input type="email" class="input-field" name="email" placeholder="Tu email" required>
+                    <input type="text" class="input-field" name="fullName" placeholder="Nombre y Apellido" required>
+                </div>
+
+                <!-- NPS -->
+                <div class="question-card">
+                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestra entrevista de IA a un amigo o colega?</h3>
+                    <div class="nps-scale" id="nps-scale">
+                        <!-- Se genera dinámicamente -->
+                    </div>
+                    <div class="nps-labels">
+                        <span>Muy improbable</span>
+                        <span>Muy probable</span>
+                    </div>
+                    <div class="nps-categories">
+                        <span>Detractores (0-6)</span>
+                        <span>Pasivos (7-8)</span>
+                        <span>Promotores (9-10)</span>
+                    </div>
+                    
+                    <!-- Preguntas condicionales del NPS -->
+                    <div id="nps-detractors" class="conditional-field hidden">
+                        <h3>¿Qué aspectos consideras que deberíamos trabajar para brindar una mejor experiencia?</h3>
+                        <textarea class="textarea-field" name="npsDetractorFeedback" placeholder="Comparte qué aspectos podríamos mejorar..."></textarea>
+                    </div>
+                    
+                    <div id="nps-passives" class="conditional-field hidden">
+                        <h3>¿Qué podríamos haber hecho diferente para que tu experiencia sea mejor?</h3>
+                        <textarea class="textarea-field" name="npsPassiveFeedback" placeholder="Comparte qué podríamos haber hecho diferente..."></textarea>
+                    </div>
+                    
+                    <div id="nps-promoters" class="conditional-field hidden">
+                        <h3>¿Qué fue lo que más te gustó del proceso?</h3>
+                        <textarea class="textarea-field" name="npsPromoterFeedback" placeholder="Comparte qué fue lo que más te gustó..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Problemas técnicos -->
+                <div class="question-card">
+                    <h3>¿Experimentaste algún problema técnico durante la entrevista?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="technicalProblems" value="no">
+                            <span>No, todo funcionó correctamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="technicalProblems" value="yes">
+                            <span>Sí, tuve algunos problemas técnicos</span>
+                        </label>
+                    </div>
+                    
+                    <div id="technical-problems-details" class="conditional-field hidden">
+                        <h3>¿Qué tipos de problemas experimentaste? (Puedes seleccionar varios)</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="comprehension">
+                                <span>Problemas de comprensión/interpretación de mis respuestas</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="interruptions">
+                                <span>Interrupciones</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="pronunciation">
+                                <span>Problemas de pronunciación</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="no_clarifications">
+                                <span>La IA no me permitió aclaraciones o seguimiento</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="connection">
+                                <span>Problemas de conexión o caídas del sistema</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="delays">
+                                <span>Retrasos entre mis respuestas y la reacción de la IA</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="interface">
+                                <span>Interfaz confusa o difícil de usar</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="ended_abruptly">
+                                <span>La entrevista terminó en la mitad de la conversación</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="never_ended">
+                                <span>La entrevista nunca finalizó</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="too_long">
+                                <span>La entrevista duró más de lo previsto</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="technicalIssues" value="other">
+                                <span>Otros (especificar abajo)</span>
+                            </label>
+                        </div>
+                        <textarea class="textarea-field" name="otherTechnicalIssues" placeholder="Describe otros problemas técnicos que experimentaste..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Interacción con IA -->
+                <div class="question-card">
+                    <h3>¿Cómo te sentiste interactuando con una IA en lugar de una persona?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="aiInteraction" value="very_comfortable">
+                            <span>Muy cómodo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiInteraction" value="comfortable">
+                            <span>Cómodo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiInteraction" value="neutral">
+                            <span>Neutral</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiInteraction" value="uncomfortable">
+                            <span>Incómodo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiInteraction" value="very_uncomfortable">
+                            <span>Muy incómodo</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Expresión profesional -->
+                <div class="question-card">
+                    <h3>¿Pudiste expresar tu trayectoria profesional y experiencia de forma clara durante la entrevista?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="completely">
+                            <span>Sí, completamente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="partially">
+                            <span>Sí, parcialmente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="difficulties">
+                            <span>No, tuve dificultades</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="professionalExpression" value="not_at_all">
+                            <span>No, no pude expresar nada</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Inglés -->
+                <div class="question-card">
+                    <h3>¿Consideras que las preguntas en inglés te permitieron expresar adecuadamente tu nivel en ese idioma?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="englishExpression" value="totally">
+                            <span>Sí, totalmente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="englishExpression" value="partially">
+                            <span>Parcialmente</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="englishExpression" value="not_at_all">
+                            <span>No, para nada</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="englishExpression" value="not_applicable">
+                            <span>No aplica/No fui evaluado en inglés</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div class="question-card">
+                    <h3>¿Te gustaría recibir feedback sobre tu entrevista?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="wantsFeedback" value="yes">
+                            <span>Sí, me gustaría recibir feedback detallado</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="wantsFeedback" value="no">
+                            <span>No, prefiero no recibir feedback</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Comentario adicional -->
+                <div class="question-card">
+                    <h3>Comentario adicional (opcional)</h3>
+                    <textarea class="textarea-field" name="additionalComment" placeholder="Comparte cualquier comentario adicional sobre tu experiencia..."></textarea>
+                </div>
+
+                <button class="btn" onclick="submitSurvey()" disabled id="submit-btn">Enviar Encuesta</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de éxito -->
+        <div id="success-screen" class="hidden">
+            <div class="header">
+                <img src="seeds-logo.png" alt="Seeds" class="seeds-logo">
+                <h1>¡Gracias por tu feedback!</h1>
+                <p>Tu respuesta ha sido registrada exitosamente</p>
+            </div>
+            <div class="content">
+                <div class="success-animation">
+                    <div class="success-icon">🎉</div>
+                    <h2 style="color: #333; margin-bottom: 20px;">Encuesta completada</h2>
+                    <p style="color: #666; font-size: 1.1em; line-height: 1.6; margin-bottom: 20px;">
+                        Agradecemos mucho tu tiempo y opiniones. Tu feedback es invaluable para seguir mejorando nuestro proceso de entrevistas con IA.
+                    </p>
+                    <div id="feedback-status" style="background: #ecfdf5; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #10b981;">
+                        <p style="margin: 0; color: #064e3b;">
+                            <strong>Estado del feedback:</strong> <span id="feedback-message"></span>
+                        </p>
+                    </div>
+                    <p style="color: #666; margin-top: 20px;">
+                        Nos pondremos en contacto contigo pronto con los próximos pasos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="hidden" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); align-items: center; justify-content: center; display: none;">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Guardando respuestas...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado de respuestas
+        let responses = {
+            candidateId: generateUniqueId(),
+            timestamp: new Date().toISOString(),
+            email: null,
+            fullName: null,
+            nps: null,
+            npsCategory: null,
+            npsFeedback: null,
+            technicalProblems: null,
+            technicalIssues: [],
+            otherTechnicalIssues: null,
+            aiInteraction: null,
+            professionalExpression: null,
+            englishExpression: null,
+            wantsFeedback: null,
+            additionalComment: null
+        };
+
+        function generateUniqueId() {
+            return 'candidate_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.style.display = 'none';
+            }
+            
+            initializeComponents();
+            setupEventListeners();
+            console.log('✅ Sistema de encuesta de entrevista cargado');
+        });
+
+        function initializeComponents() {
+            // Generar escala NPS
+            const npsContainer = document.getElementById('nps-scale');
+            for (let i = 0; i <= 10; i++) {
+                const option = document.createElement('div');
+                option.className = 'nps-option';
+                option.textContent = i;
+                option.addEventListener('click', () => selectNPS(i, option));
+                npsContainer.appendChild(option);
+            }
+        }
+
+        function setupEventListeners() {
+            // Campos de texto
+            document.querySelector('input[name="email"]').addEventListener('input', function() {
+                responses.email = this.value;
+                checkFormComplete();
+            });
+
+            document.querySelector('input[name="fullName"]').addEventListener('input', function() {
+                responses.fullName = this.value;
+                checkFormComplete();
+            });
+
+            // Radio buttons
+            setupRadioListeners('technicalProblems', showTechnicalProblems);
+            setupRadioListeners('aiInteraction');
+            setupRadioListeners('professionalExpression');
+            setupRadioListeners('englishExpression');
+            setupRadioListeners('wantsFeedback');
+
+            // Checkboxes para problemas técnicos
+            document.querySelectorAll('input[name="technicalIssues"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateCheckboxStyles(this);
+                    updateTechnicalIssues();
+                });
+            });
+
+            // Textareas
+            document.querySelector('textarea[name="otherTechnicalIssues"]').addEventListener('input', function() {
+                responses.otherTechnicalIssues = this.value;
+            });
+
+            document.querySelector('textarea[name="additionalComment"]').addEventListener('input', function() {
+                responses.additionalComment = this.value;
+            });
+        }
+
+        function setupRadioListeners(name, callback = null) {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateRadioStyles(this);
+                    responses[name] = this.value;
+                    if (callback) callback();
+                    checkFormComplete();
+                });
+            });
+        }
+
+        function selectNPS(value, element) {
+            document.querySelectorAll('.nps-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            responses.nps = value;
+            
+            // Determinar categoría y mostrar pregunta correspondiente
+            hideAllNPSQuestions();
+            if (value >= 0 && value <= 6) {
+                responses.npsCategory = 'detractor';
+                document.getElementById('nps-detractors').classList.remove('hidden');
+                setupNPSTextarea('npsDetractorFeedback');
+            } else if (value >= 7 && value <= 8) {
+                responses.npsCategory = 'passive';
+                document.getElementById('nps-passives').classList.remove('hidden');
+                setupNPSTextarea('npsPassiveFeedback');
+            } else if (value >= 9 && value <= 10) {
+                responses.npsCategory = 'promoter';
+                document.getElementById('nps-promoters').classList.remove('hidden');
+                setupNPSTextarea('npsPromoterFeedback');
+            }
+            
+            checkFormComplete();
+        }
+
+        function hideAllNPSQuestions() {
+            document.getElementById('nps-detractors').classList.add('hidden');
+            document.getElementById('nps-passives').classList.add('hidden');
+            document.getElementById('nps-promoters').classList.add('hidden');
+        }
+
+        function setupNPSTextarea(fieldName) {
+            const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    responses.npsFeedback = this.value;
+                });
+            }
+        }
+
+        function updateRadioStyles(selectedRadio) {
+            selectedRadio.closest('.radio-group').querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            selectedRadio.closest('.radio-option').classList.add('selected');
+        }
+
+        function updateCheckboxStyles(selectedCheckbox) {
+            const option = selectedCheckbox.closest('.checkbox-option');
+            if (selectedCheckbox.checked) {
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
+            }
+        }
+
+        function showTechnicalProblems() {
+            const details = document.getElementById('technical-problems-details');
+            if (responses.technicalProblems === 'yes') {
+                details.classList.remove('hidden');
+            } else {
+                details.classList.add('hidden');
+                // Limpiar selecciones de checkboxes
+                document.querySelectorAll('input[name="technicalIssues"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.closest('.checkbox-option').classList.remove('selected');
+                });
+                responses.technicalIssues = [];
+                responses.otherTechnicalIssues = null;
+            }
+        }
+
+        function updateTechnicalIssues() {
+            responses.technicalIssues = [];
+            document.querySelectorAll('input[name="technicalIssues"]:checked').forEach(checkbox => {
+                responses.technicalIssues.push(checkbox.value);
+            });
+        }
+
+        function checkFormComplete() {
+            const required = ['email', 'fullName', 'nps', 'technicalProblems', 'aiInteraction', 'professionalExpression', 'englishExpression', 'wantsFeedback'];
+            const isComplete = required.every(field => responses[field] !== null && responses[field] !== '');
+            
+            // Validar email
+            const emailValid = responses.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responses.email);
+            
+            document.getElementById('submit-btn').disabled = !(isComplete && emailValid);
+        }
+
+        async function submitSurvey() {
+            showLoading(true);
+            
+            try {
+                await saveToGoogleSheets({
+                    ...responses,
+                    surveyType: 'interview_feedback',
+                    timestamp: new Date().toISOString()
+                });
+
+                // Mostrar mensaje según si quiere feedback o no
+                const feedbackMessage = responses.wantsFeedback === 'yes' 
+                    ? 'Te enviaremos tu feedback detallado en los próximos días'
+                    : 'Hemos registrado que prefieres no recibir feedback';
+                
+                document.getElementById('feedback-message').textContent = feedbackMessage;
+                showScreen('success-screen');
+                
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                alert('Hubo un error al procesar tu respuesta. Por favor intenta de nuevo.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function saveToGoogleSheets(data) {
+            try {
+                console.log('📊 Datos a guardar:', data);
+                
+                // Obtener IP primero
+                const userIP = await getUserIP().catch(() => 'No disponible');
+                
+                const enrichedData = {
+                    ...data,
+                    ipAddress: userIP,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+                
+                console.log('📦 Datos enriquecidos:', enrichedData);
+                
+                return await new Promise((resolve, reject) => {
+                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                    const timeoutId = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('Timeout: No response from server'));
+                    }, 15000);
+                    
+                    const cleanup = () => {
+                        if (window[callbackName]) {
+                            delete window[callbackName];
+                        }
+                        const script = document.getElementById(callbackName);
+                        if (script) {
+                            script.remove();
+                        }
+                        clearTimeout(timeoutId);
+                    };
+                    
+                    window[callbackName] = function(response) {
+                        cleanup();
+                        console.log('✅ Respuesta de Google Sheets:', response);
+                        if (response && response.success) {
+                            resolve(response);
+                        } else {
+                            reject(new Error(response?.error || 'Error desconocido en la respuesta'));
+                        }
+                    };
+                    
+                    const baseUrl = 'https://script.google.com/macros/s/AKfycbyzGVZHeiN1Z0PBy-xn75PrkRcSA4rYmcE-SKBNhSQ6lRnByVrVaGKEqdPO3CJQ_6nb/exec';
+                    const params = new URLSearchParams({
+                        callback: callbackName,
+                        data: JSON.stringify(enrichedData)
+                    });
+                    
+                    const fullUrl = `${baseUrl}?${params.toString()}`;
+                    console.log('🔗 URL completa:', fullUrl.substring(0, 150) + '...');
+                    
+                    const script = document.createElement('script');
+                    script.id = callbackName;
+                    script.src = fullUrl;
+                    
+                    script.onerror = (error) => {
+                        cleanup();
+                        console.error('❌ Error cargando script:', error);
+                        reject(new Error('Error loading script - posible problema de red o URL'));
+                    };
+                    
+                    script.onload = () => {
+                        console.log('📡 Script cargado exitosamente');
+                    };
+                    
+                    document.head.appendChild(script);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error al guardar en Google Sheets:', error);
+                throw error;
+            }
+        }
+
+        async function getUserIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                return 'No disponible';
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.container > div').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                if (show) {
+                    overlay.classList.remove('hidden');
+                    overlay.style.display = 'flex';
+                } else {
+                    overlay.classList.add('hidden');
+                    overlay.style.display = 'none';
+                }
+            }
+        }
+
+        console.log('🚀 Sistema de encuesta de entrevista iniciado');
+        console.log('🆔 ID del candidato:', responses.candidateId);
+    </script>
+</body>
+</html>)
