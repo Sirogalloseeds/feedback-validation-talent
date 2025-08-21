@@ -345,7 +345,7 @@
                 <!-- Info del candidato -->
                 <div id="candidate-info" class="candidate-info hidden">
                     <strong>📋 Reporte de feedback para:</strong><br>
-                    Candidato: <span id="candidate-name"></span> | Posición: <span id="position-name"></span>
+                    Candidato: <span id="candidate-name"></span>
                 </div>
 
                 <!-- Reporte de feedback -->
@@ -528,7 +528,6 @@
             timestamp: new Date().toISOString(),
             // Datos del candidato (si vienen en URL)
             candidateName: null,
-            position: null,
             reportId: null,
             // Evaluación del feedback
             utility: null,
@@ -561,20 +560,17 @@
             
             responses.reportId = urlParams.get('reportId');
             responses.candidateName = urlParams.get('candidate');
-            responses.position = urlParams.get('position');
 
             // Mostrar info del candidato si existe
-            if (responses.candidateName || responses.position) {
+            if (responses.candidateName) {
                 const infoDiv = document.getElementById('candidate-info');
                 document.getElementById('candidate-name').textContent = responses.candidateName || 'No especificado';
-                document.getElementById('position-name').textContent = responses.position || 'No especificado';
                 infoDiv.classList.remove('hidden');
             }
 
             console.log('📋 Parámetros cargados:', {
                 reportId: responses.reportId,
-                candidate: responses.candidateName,
-                position: responses.position
+                candidate: responses.candidateName
             });
         }
 
