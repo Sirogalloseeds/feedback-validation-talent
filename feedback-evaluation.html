@@ -663,16 +663,35 @@
             document.getElementById('submit-btn').disabled = !isComplete;
         }
 
+       // REEMPLAZAR todo desde submitEvaluation hasta getUserIP en feedback-evaluation.html
+
         async function submitEvaluation() {
             showLoading(true);
             
             try {
-                await saveToGoogleSheets({
-                    ...responses,
+                // Formatear datos según las columnas del Google Sheet
+                const formattedData = {
                     surveyType: 'feedback_evaluation',
+                    candidateId: responses.candidateId,
+                    reportId: '', // No usamos reportId en el nuevo sistema
+                    candidateName: responses.candidateName || '',
+                    position: '', // No tenemos posición en este formulario
+                    feedbackClaro: mapClarityToText(responses.clarity),
+                    utilidad: mapUtilityToNumber(responses.utility),
+                    incluirMas: responses.improvements || '',
+                    nivelDetalle: mapDetailLevelToText(responses.detailLevel),
+                    queFalto: responses.improvements || '', // Mismo que incluirMas por ahora
+                    ipAddress: await getUserIP().catch(() => 'No disponible'),
+                    userAgent: navigator.userAgent,
+                    sessionId: responses.candidateId,
+                    comentariosExtra: `Precisión: ${mapAccuracyToText(responses.accuracy)}`,
+                    url: window.location.href,
                     timestamp: new Date().toISOString()
-                });
+                };
 
+                console.log('📤 Datos formateados para Google Sheets:', formattedData);
+                
+                await saveToGoogleSheets(formattedData);
                 showScreen('success-screen');
                 
             } catch (error) {
@@ -683,21 +702,49 @@
             }
         }
 
+        // Funciones de mapeo para convertir valores a formato esperado
+        function mapClarityToText(clarity) {
+            const clarityMap = {
+                'very_clear': 'muy claro',
+                'partially_clear': 'parcialmente',
+                'not_clear': 'no'
+            };
+            return clarityMap[clarity] || clarity || '';
+        }
+
+        function mapUtilityToNumber(utility) {
+            const utilityMap = {
+                'very_useful': '5',
+                'useful': '4', 
+                'neutral': '3',
+                'not_very_useful': '2',
+                'not_useful': '1'
+            };
+            return utilityMap[utility] || utility || '';
+        }
+
+        function mapDetailLevelToText(detailLevel) {
+            const detailMap = {
+                'superficial': 'superficial',
+                'adequate': 'adecuado',
+                'too_extensive': 'muy extenso'
+            };
+            return detailMap[detailLevel] || detailLevel || '';
+        }
+
+        function mapAccuracyToText(accuracy) {
+            const accuracyMap = {
+                'very_accurate': 'muy acertado',
+                'somewhat_accurate': 'algo acertado',
+                'not_very_accurate': 'poco acertado',
+                'not_accurate': 'nada acertado'
+            };
+            return accuracyMap[accuracy] || accuracy || '';
+        }
+
         async function saveToGoogleSheets(data) {
             try {
                 console.log('📊 Datos a guardar:', data);
-                
-                // Obtener IP primero
-                const userIP = await getUserIP().catch(() => 'No disponible');
-                
-                const enrichedData = {
-                    ...data,
-                    ipAddress: userIP,
-                    userAgent: navigator.userAgent,
-                    url: window.location.href
-                };
-                
-                console.log('📦 Datos enriquecidos:', enrichedData);
                 
                 return await new Promise((resolve, reject) => {
                     const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
@@ -731,7 +778,7 @@
                     const baseUrl = 'https://script.google.com/macros/s/AKfycbyzGVZHeiN1Z0PBy-xn75PrkRcSA4rYmcE-SKBNhSQ6lRnByVrVaGKEqdPO3CJQ_6nb/exec';
                     const params = new URLSearchParams({
                         callback: callbackName,
-                        data: JSON.stringify(enrichedData)
+                        data: JSON.stringify(data)
                     });
                     
                     const fullUrl = `${baseUrl}?${params.toString()}`;
