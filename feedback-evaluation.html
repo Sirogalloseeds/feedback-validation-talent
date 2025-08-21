@@ -541,6 +541,62 @@
             return 'evaluation_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
         }
 
+        function loadReportContent() {
+            const reportContainer = document.getElementById('report-content');
+            
+            // Si hay un reportId en la URL, intentar cargar desde localStorage
+            if (responses.reportId) {
+                console.log('🔍 Buscando reporte con ID:', responses.reportId);
+                
+                try {
+                    const reportData = localStorage.getItem(responses.reportId);
+                    
+                    if (reportData) {
+                        const parsedData = JSON.parse(reportData);
+                        console.log('✅ Reporte encontrado:', parsedData);
+                        
+                        // Cargar el HTML del reporte
+                        reportContainer.innerHTML = parsedData.html;
+                        
+                        // Actualizar el nombre del candidato si no estaba en la URL
+                        if (!responses.candidateName && parsedData.candidate) {
+                            responses.candidateName = parsedData.candidate;
+                            document.getElementById('candidate-name').textContent = parsedData.candidate;
+                            document.getElementById('candidate-info').classList.remove('hidden');
+                        }
+                        
+                        console.log('📄 Reporte personalizado cargado exitosamente');
+                        return;
+                        
+                    } else {
+                        console.warn('⚠️ No se encontró reporte en localStorage con ID:', responses.reportId);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error al cargar reporte desde localStorage:', error);
+                }
+            }
+            
+            // Si no hay reportId o no se pudo cargar, usar reporte por defecto
+            console.log('📝 Cargando reporte por defecto');
+            reportContainer.innerHTML = defaultFeedbackReport;
+        }
+
+        function debugLocalStorage() {
+            console.log('🔍 Contenido de localStorage:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('report_')) {
+                    const data = localStorage.getItem(key);
+                    try {
+                        console.log(`${key}:`, JSON.parse(data));
+                    } catch (e) {
+                        console.log(`${key}: Error parsing data`);
+                    }
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) {
@@ -753,12 +809,24 @@
             }
         };
 
+        // Función para debugging desde consola
+        window.debugFeedback = {
+            checkLocalStorage: debugLocalStorage,
+            showCurrentData: () => console.log('Current responses:', responses),
+            loadCustomReport: (html) => {
+                document.getElementById('report-content').innerHTML = html;
+            },
+            testReport: () => {
+                const testHTML = `<h2>🧪 Reporte de Prueba</h2><p>Este es un reporte de prueba cargado correctamente.</p>`;
+                document.getElementById('report-content').innerHTML = testHTML;
+            }
+        };
+
         console.log('🚀 Sistema de evaluación de feedback iniciado');
         console.log('🆔 ID de evaluación:', responses.candidateId);
         if (responses.reportId) {
             console.log('📋 Report ID:', responses.reportId);
             console.log('👤 Candidato:', responses.candidateName || 'No especificado');
-            console.log('💼 Posición:', responses.position || 'No especificado');
         }
     </script>
 </body>
