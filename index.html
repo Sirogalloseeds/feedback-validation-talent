@@ -965,13 +965,18 @@
             try {
                 console.log('📊 Datos a guardar:', data);
                 
+                // Obtener IP primero (antes del Promise)
+                const userIP = await getUserIP().catch(() => 'No disponible');
+                
                 // Añadir datos adicionales
                 const enrichedData = {
                     ...data,
-                    ipAddress: await getUserIP().catch(() => 'No disponible'),
+                    ipAddress: userIP,
                     userAgent: navigator.userAgent,
                     url: window.location.href
                 };
+                
+                console.log('📦 Datos enriquecidos:', enrichedData);
                 
                 // Usar JSONP para evitar problemas de CORS
                 return await new Promise((resolve, reject) => {
@@ -997,10 +1002,10 @@
                     window[callbackName] = function(response) {
                         cleanup();
                         console.log('✅ Respuesta de Google Sheets:', response);
-                        if (response.success) {
+                        if (response && response.success) {
                             resolve(response);
                         } else {
-                            reject(new Error(response.error || 'Error desconocido'));
+                            reject(new Error(response?.error || 'Error desconocido en la respuesta'));
                         }
                     };
                     
@@ -1011,17 +1016,24 @@
                         data: JSON.stringify(enrichedData)
                     });
                     
+                    const fullUrl = `${baseUrl}?${params.toString()}`;
+                    console.log('🔗 URL completa:', fullUrl.substring(0, 150) + '...');
+                    
                     // Crear script tag para JSONP
                     const script = document.createElement('script');
                     script.id = callbackName;
-                    script.src = `${baseUrl}?${params.toString()}`;
+                    script.src = fullUrl;
                     
-                    script.onerror = () => {
+                    script.onerror = (error) => {
                         cleanup();
-                        reject(new Error('Error loading script'));
+                        console.error('❌ Error cargando script:', error);
+                        reject(new Error('Error loading script - posible problema de red o URL'));
                     };
                     
-                    console.log('🔗 Enviando datos via JSONP a:', script.src.substring(0, 100) + '...');
+                    script.onload = () => {
+                        console.log('📡 Script cargado exitosamente');
+                    };
+                    
                     document.head.appendChild(script);
                 });
                 
