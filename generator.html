@@ -224,7 +224,7 @@
                     <li>Envíala a <strong>TODOS</strong> los candidatos después de su entrevista</li>
                     <li>Cada persona completará su encuesta individual</li>
                     <li>Todas las respuestas se guardarán automáticamente en Google Sheets</li>
-                    <li>Revisa quiénes respondieron "SÍ" a recibir feedback para el siguiente paso</li>
+                    <li>Revisa quiénes respondieron "Sí" a recibir feedback para el siguiente paso</li>
                 </ol>
             </div>
         </div>
@@ -234,7 +234,7 @@
             <h2>Generar URL para Evaluación de Feedback</h2>
             
             <div class="warning-box">
-                <strong>⚠️ Importante:</strong> Esta URL se genera <strong>individualmente</strong> y se envía solo a candidatos que respondieron "SÍ" a recibir feedback en la encuesta inicial.
+                <strong>⚠️ Importante:</strong> Esta URL se genera <strong>individualmente</strong> y se envía solo a candidatos que respondieron "Sí" a recibir feedback en la encuesta inicial.
             </div>
 
             <form id="evaluation-form">
@@ -257,7 +257,7 @@
             </form>
 
             <div class="info-box" style="margin-top: 20px;">
-                <h3>🔄 Proceso para Evaluación de Feedback:</h3>
+                <h3>📄 Proceso para Evaluación de Feedback:</h3>
                 <ol>
                     <li>Revisa en Google Sheets quién quiere recibir feedback</li>
                     <li>Procesa el JSON de su entrevista con ChatGPT para generar el reporte HTML</li>
@@ -347,31 +347,34 @@
                 return;
             }
             
-            // Generar ID único para el reporte
-            const reportId = 'report_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-            
-            // Guardar el reporte en localStorage (simulando base de datos)
-            const reportData = {
-                id: reportId,
-                candidate: candidate,
-                html: reportHTML,
-                created: new Date().toISOString()
-            };
-            
-            // Guardar en localStorage para que el sistema lo pueda recuperar
-            localStorage.setItem(reportId, JSON.stringify(reportData));
-            
-            // Crear URL con parámetros (sin position)
-            const params = new URLSearchParams({
-                reportId: reportId,
-                candidate: candidate
-            });
-            
-            const finalURL = `${baseURL}?${params.toString()}`;
-            
-            showResult('Evaluación de Feedback (URL Única)', candidate, 'No especificado', finalURL, reportHTML);
-            
-            console.log('Reporte generado:', reportData);
+            try {
+                // Codificar el reporte en base64 para enviarlo en la URL
+                const encodedReport = btoa(encodeURIComponent(reportHTML));
+                
+                // Crear URL con el reporte codificado
+                const params = new URLSearchParams({
+                    candidate: candidate,
+                    report: encodedReport
+                });
+                
+                const finalURL = `${baseURL}?${params.toString()}`;
+                
+                // Verificar que la URL no sea demasiado larga
+                if (finalURL.length > 8000) {
+                    alert('⚠️ El reporte es muy largo para enviar por URL. Por favor acórtalo un poco.');
+                    return;
+                }
+                
+                showResult('Evaluación de Feedback (URL Única)', candidate, 'No especificado', finalURL, reportHTML);
+                
+                console.log('✅ URL generada con reporte codificado');
+                console.log('📏 Longitud de URL:', finalURL.length);
+                console.log('📄 Reporte codificado correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error al codificar reporte:', error);
+                alert('Error al procesar el reporte. Verifica que el HTML esté bien formado.');
+            }
         }
 
         function showResult(type, candidate, position, url, reportHTML = null) {
