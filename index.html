@@ -819,9 +819,6 @@
             candidateName: null,
             position: null,
             reportId: null,
-            // Control de duplicados
-            isCompleted: false,
-            completionTimestamp: null,
             // Encuesta inicial
             nps: null,
             technicalProblems: null,
@@ -852,25 +849,15 @@
                 loadingOverlay.style.display = 'none';
             }
             
-            // SEGUNDO PASO: Cargar parámetros y verificar duplicados
+            // SEGUNDO PASO: Cargar parámetros y continuar normalmente
             loadParametersFromURL();
+            initializeComponents();
+            setupEventListeners();
             
-            // TERCER PASO: Verificar si ya completó la encuesta
-            checkIfAlreadyCompleted().then(isCompleted => {
-                if (isCompleted) {
-                    showAlreadyCompletedScreen();
-                    return;
-                }
-                
-                // CUARTO PASO: Si no completó, continuar normalmente
-                initializeComponents();
-                setupEventListeners();
-                
-                // QUINTO PASO: Asegurar que loading esté oculto
-                showLoading(false);
-                
-                console.log('✅ Sistema cargado completamente');
-            });
+            // TERCER PASO: Asegurar que loading esté oculto
+            showLoading(false);
+            
+            console.log('✅ Sistema cargado completamente');
         });
 
         function loadParametersFromURL() {
@@ -1081,10 +1068,8 @@
                     timestamp: new Date().toISOString()
                 });
 
-                // Marcar como completado DESPUÉS de guardar exitosamente
-                markAsCompleted('interview_survey', {
-                    wantsFeedback: responses.wantsFeedback
-                });
+                // Ya no marcamos como completado - permitir múltiples respuestas
+                console.log('✅ Encuesta guardada - múltiples respuestas permitidas');
 
                 if (responses.wantsFeedback === 'yes') {
                     showScreen('feedback-report');
@@ -1109,10 +1094,8 @@
                     timestamp: new Date().toISOString()
                 });
 
-                // Marcar como completado DESPUÉS de guardar exitosamente
-                markAsCompleted('feedback_evaluation', {
-                    feedbackRating: responses.feedbackUtility
-                });
+                // Ya no marcamos como completado - permitir múltiples respuestas
+                console.log('✅ Evaluación guardada - múltiples respuestas permitidas');
 
                 showScreen('final-thank-you');
             } catch (error) {
