@@ -136,6 +136,7 @@
             display: flex;
             margin-bottom: 30px;
             border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
         }
 
         .tab {
@@ -144,6 +145,9 @@
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             font-weight: 600;
+            white-space: nowrap;
+            min-width: 200px;
+            text-align: center;
         }
 
         .tab:hover {
@@ -189,6 +193,31 @@
             margin-bottom: 20px;
             color: #064e3b;
         }
+
+        /* Nuevo estilo para la nueva tab */
+        .screening-tab {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .screening-tab:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+
+        .screening-tab.active {
+            border-bottom-color: #8b5cf6;
+            color: #8b5cf6;
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .tab {
+                min-width: 150px;
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -197,6 +226,7 @@
         
         <div class="tab-container">
             <div class="tab active" onclick="switchTab('interview')">📋 Encuesta de Entrevista</div>
+            <div class="tab screening-tab" onclick="switchTab('screening')">🤖 Screening de IA</div>
             <div class="tab" onclick="switchTab('evaluation')">📊 Evaluación de Feedback</div>
         </div>
 
@@ -229,7 +259,46 @@
             </div>
         </div>
 
-        <!-- TAB 2: Evaluación de Feedback -->
+        <!-- TAB 2: Encuesta de Screening de IA -->
+        <div id="screening-tab" class="tab-content">
+            <h2>URL para Encuesta de Screening de IA</h2>
+            
+            <div class="info-box">
+                <strong>🤖 Información:</strong> Esta encuesta se envía después del <strong>screening inicial con IA</strong> para evaluar la experiencia específicamente con el proceso automatizado. <strong>No necesita URL única - todos los candidatos usan la misma URL.</strong>
+            </div>
+
+            <form id="screening-form">
+                <div class="form-group">
+                    <label for="screening-base-url">URL Base del Sistema:</label>
+                    <input type="url" id="screening-base-url" placeholder="https://tu-usuario.github.io/tu-repo/screening-feedback.html" value="">
+                </div>
+
+                <button type="button" class="btn screening-tab" onclick="getScreeningURL()">Obtener URL de Screening</button>
+            </form>
+
+            <div class="warning-box" style="margin-top: 20px;">
+                <h3>🔍 Diferencias con la Encuesta de Entrevista:</h3>
+                <ul>
+                    <li><strong>Enfoque específico:</strong> Pregunta sobre habilidades reflejadas para el puesto</li>
+                    <li><strong>Porcentaje de preguntas útiles:</strong> Mide qué tan relevantes fueron las preguntas</li>
+                    <li><strong>Preguntas poco relevantes:</strong> Identifica preguntas que no aportaron valor</li>
+                    <li><strong>Competencias no reflejadas:</strong> Aspectos del perfil que no se pudieron mostrar</li>
+                </ul>
+            </div>
+
+            <div class="success-box" style="margin-top: 20px;">
+                <h3>📨 Cómo usar esta URL:</h3>
+                <ol>
+                    <li>Copia la URL que aparece arriba</li>
+                    <li>Envíala a <strong>TODOS</strong> los candidatos después del screening de IA</li>
+                    <li>Esta encuesta ayuda a mejorar las preguntas del screening automático</li>
+                    <li>Los datos se guardan en una hoja separada en Google Sheets</li>
+                    <li>Úsala para optimizar el proceso de screening con IA</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- TAB 3: Evaluación de Feedback -->
         <div id="evaluation-tab" class="tab-content">
             <h2>Generar URL para Evaluación de Feedback</h2>
             
@@ -295,11 +364,13 @@
                 // Extraer la URL base de GitHub Pages
                 const baseURL = currentURL.replace('/generator.html', '/');
                 document.getElementById('interview-base-url').value = baseURL + 'interview-feedback.html';
+                document.getElementById('screening-base-url').value = baseURL + 'screening-feedback.html';
                 document.getElementById('evaluation-base-url').value = baseURL + 'feedback-evaluation.html';
             } else if (currentURL.includes('localhost') || currentURL.includes('127.0.0.1')) {
                 // Para servidor local
                 const baseURL = currentURL.replace('/generator.html', '/');
                 document.getElementById('interview-base-url').value = baseURL + 'interview-feedback.html';
+                document.getElementById('screening-base-url').value = baseURL + 'screening-feedback.html';
                 document.getElementById('evaluation-base-url').value = baseURL + 'feedback-evaluation.html';
             }
             
@@ -335,6 +406,18 @@
             
             // Para la encuesta de entrevista, simplemente usamos la URL base
             showResult('Encuesta de Entrevista (URL Simple)', 'Todos los candidatos', 'Todas las posiciones', baseURL);
+        }
+
+        function getScreeningURL() {
+            const baseURL = document.getElementById('screening-base-url').value;
+            
+            if (!baseURL) {
+                alert('Por favor ingresa la URL base del sistema');
+                return;
+            }
+            
+            // Para la encuesta de screening, simplemente usamos la URL base
+            showResult('Encuesta de Screening de IA (URL Simple)', 'Todos los candidatos', 'Todas las posiciones', baseURL);
         }
 
         function generateEvaluationURL() {
@@ -445,9 +528,15 @@
         }
 
         // Función helper para testing
-        function testBothURLs() {
+        function testAllURLs() {
             // Obtener URL de encuesta
             getInterviewURL();
+            
+            setTimeout(() => {
+                // Cambiar a tab de screening
+                switchTab('screening');
+                getScreeningURL();
+            }, 1000);
             
             setTimeout(() => {
                 // Cambiar a tab de evaluación
@@ -462,8 +551,9 @@
         // Exponer funciones globalmente para debugging
         window.feedbackGenerator = {
             getInterviewURL,
+            getScreeningURL,
             generateEvaluationURL,
-            testBothURLs
+            testAllURLs
         };
     </script>
 </body>
