@@ -503,55 +503,53 @@
                     </div>
                 </div>
 
-                <!-- Nueva pregunta: Habilidades para el puesto -->
+                <!-- Nueva pregunta 1: Alineación con habilidades del puesto -->
                 <div class="question-card">
-                    <h3>¿Consideras que las preguntas te permitieron reflejar adecuadamente tus habilidades para el puesto?</h3>
+                    <h3>¿Las preguntas de la entrevista estuvieron alineadas con las habilidades necesarias para el puesto?</h3>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="totally">
-                            <span>Sí, totalmente</span>
+                            <input type="radio" name="questionsAligned" value="strongly_agree">
+                            <span>Muy de acuerdo</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="partially">
-                            <span>Parcialmente</span>
+                            <input type="radio" name="questionsAligned" value="agree">
+                            <span>De acuerdo</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="not_at_all">
-                            <span>No, para nada</span>
+                            <input type="radio" name="questionsAligned" value="disagree">
+                            <span>En desacuerdo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="questionsAligned" value="strongly_disagree">
+                            <span>Muy en desacuerdo</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Nueva pregunta: Porcentaje de preguntas útiles -->
+                <!-- Nueva pregunta 2: Reflejar habilidades adecuadamente -->
                 <div class="question-card">
-                    <h3>¿Qué porcentaje de las preguntas dirías que fueron útiles para mostrar tu experiencia para el puesto?</h3>
+                    <h3>¿Consideras que las preguntas te permitieron reflejar adecuadamente tus habilidades?</h3>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="usefulQuestions" value="0-25">
-                            <span>0-25%</span>
+                            <input type="radio" name="skillsReflection" value="strongly_agree">
+                            <span>Muy de acuerdo</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="usefulQuestions" value="26-50">
-                            <span>26-50%</span>
+                            <input type="radio" name="skillsReflection" value="agree">
+                            <span>De acuerdo</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="usefulQuestions" value="51-75">
-                            <span>51-75%</span>
+                            <input type="radio" name="skillsReflection" value="disagree">
+                            <span>En desacuerdo</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="usefulQuestions" value="76-100">
-                            <span>76-100%</span>
+                            <input type="radio" name="skillsReflection" value="strongly_disagree">
+                            <span>Muy en desacuerdo</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Nueva pregunta: Preguntas poco relevantes -->
-                <div class="question-card">
-                    <h3>¿Hubo alguna pregunta que consideres poco relevante o no relacionada a la posición?</h3>
-                    <textarea class="textarea-field" name="irrelevantQuestions" placeholder="Si hubo preguntas poco relevantes, compártelas aquí..."></textarea>
-                </div>
-
-                <!-- Nueva pregunta: Competencias no reflejadas -->
+                <!-- Nueva pregunta 3: Competencias no reflejadas -->
                 <div class="question-card">
                     <h3>¿Qué aspecto de tus competencias crees que no quedó bien reflejado en la entrevista?</h3>
                     <textarea class="textarea-field" name="unreflectedCompetencies" placeholder="Describe qué aspectos de tu perfil no pudiste mostrar adecuadamente..."></textarea>
@@ -654,9 +652,8 @@
             technicalIssues: [],
             otherTechnicalIssues: null,
             aiInteraction: null,
+            questionsAligned: null,
             skillsReflection: null,
-            usefulQuestions: null,
-            irrelevantQuestions: null,
             unreflectedCompetencies: null,
             englishExpression: null,
             wantsFeedback: null,
@@ -706,8 +703,8 @@
             // Radio buttons
             setupRadioListeners('technicalProblems', showTechnicalProblems);
             setupRadioListeners('aiInteraction');
+            setupRadioListeners('questionsAligned');
             setupRadioListeners('skillsReflection');
-            setupRadioListeners('usefulQuestions');
             setupRadioListeners('englishExpression');
             setupRadioListeners('wantsFeedback');
 
@@ -722,10 +719,6 @@
             // Textareas
             document.querySelector('textarea[name="otherTechnicalIssues"]').addEventListener('input', function() {
                 responses.otherTechnicalIssues = this.value;
-            });
-
-            document.querySelector('textarea[name="irrelevantQuestions"]').addEventListener('input', function() {
-                responses.irrelevantQuestions = this.value;
             });
 
             document.querySelector('textarea[name="unreflectedCompetencies"]').addEventListener('input', function() {
@@ -827,7 +820,7 @@
         }
 
         function checkFormComplete() {
-            const required = ['email', 'fullName', 'nps', 'technicalProblems', 'aiInteraction', 'skillsReflection', 'usefulQuestions', 'englishExpression', 'wantsFeedback'];
+            const required = ['email', 'fullName', 'nps', 'technicalProblems', 'aiInteraction', 'questionsAligned', 'skillsReflection', 'englishExpression', 'wantsFeedback'];
             const isComplete = required.every(field => responses[field] !== null && responses[field] !== '');
             
             // Validar email
