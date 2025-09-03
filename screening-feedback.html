@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback de Screening de IA - Seeds</title>
+    <title>Feedback de entrevista de Screening - Seeds</title>
     <style>
         * {
             margin: 0;
@@ -311,14 +311,6 @@
             display: none;
         }
 
-        .nps-categories {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.75em;
-            color: #9ca3af;
-        }
-
         @media (max-width: 768px) {
             .nps-scale {
                 grid-template-columns: repeat(6, 1fr);
@@ -366,7 +358,7 @@
         <div id="survey-screen">
             <div class="header">
                 <img src="seeds-logo.png" alt="Seeds" class="seeds-logo">
-                <h1>Feedback de Screening de IA</h1>
+                <h1>Feedback de entrevista de Screening</h1>
                 <p>Tu opinión nos ayuda a mejorar continuamente</p>
             </div>
             <div class="content">
@@ -379,18 +371,13 @@
 
                 <!-- NPS -->
                 <div class="question-card">
-                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestra entrevista de screening con IA a un amigo o colega?</h3>
+                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestra entrevista de screening a un amigo o colega?</h3>
                     <div class="nps-scale" id="nps-scale">
                         <!-- Se genera dinámicamente -->
                     </div>
                     <div class="nps-labels">
                         <span>Muy improbable</span>
                         <span>Muy probable</span>
-                    </div>
-                    <div class="nps-categories">
-                        <span>Detractores (0-6)</span>
-                        <span>Pasivos (7-8)</span>
-                        <span>Promotores (9-10)</span>
                     </div>
                     
                     <!-- Preguntas condicionales del NPS -->
@@ -410,7 +397,7 @@
                     </div>
                 </div>
 
-                <!-- Problemas técnicos (igual que la encuesta anterior) -->
+                <!-- Problemas técnicos -->
                 <div class="question-card">
                     <h3>¿Experimentaste algún problema técnico durante la entrevista?</h3>
                     <div class="radio-group">
@@ -503,7 +490,7 @@
                     </div>
                 </div>
 
-                <!-- Nueva pregunta 1: Alineación con habilidades del puesto -->
+                <!-- Alineación con habilidades del puesto -->
                 <div class="question-card">
                     <h3>¿Las preguntas de la entrevista estuvieron alineadas con las habilidades necesarias para el puesto?</h3>
                     <div class="radio-group">
@@ -526,7 +513,7 @@
                     </div>
                 </div>
 
-                <!-- Nueva pregunta 2: Reflejar habilidades adecuadamente -->
+                <!-- Reflejar habilidades adecuadamente -->
                 <div class="question-card">
                     <h3>¿Consideras que las preguntas te permitieron reflejar adecuadamente tus habilidades?</h3>
                     <div class="radio-group">
@@ -549,13 +536,7 @@
                     </div>
                 </div>
 
-                <!-- Nueva pregunta 3: Competencias no reflejadas -->
-                <div class="question-card">
-                    <h3>¿Qué aspecto de tus competencias crees que no quedó bien reflejado en la entrevista?</h3>
-                    <textarea class="textarea-field" name="unreflectedCompetencies" placeholder="Describe qué aspectos de tu perfil no pudiste mostrar adecuadamente..."></textarea>
-                </div>
-
-                <!-- Inglés (mantenemos esta igual) -->
+                <!-- Inglés -->
                 <div class="question-card">
                     <h3>¿Consideras que las preguntas en inglés te permitieron expresar adecuadamente tu nivel en ese idioma?</h3>
                     <div class="radio-group">
@@ -578,7 +559,7 @@
                     </div>
                 </div>
 
-                <!-- Feedback (mantenemos igual) -->
+                <!-- Feedback -->
                 <div class="question-card">
                     <h3>¿Te gustaría recibir feedback sobre tu entrevista?</h3>
                     <div class="radio-group">
@@ -615,15 +596,7 @@
                     <div class="success-icon">🎉</div>
                     <h2 style="color: #333; margin-bottom: 20px;">Encuesta completada</h2>
                     <p style="color: #666; font-size: 1.1em; line-height: 1.6; margin-bottom: 20px;">
-                        Agradecemos mucho tu tiempo y opiniones. Tu feedback es invaluable para seguir mejorando nuestro proceso de entrevistas de screening con IA.
-                    </p>
-                    <div id="feedback-status" style="background: #ecfdf5; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #10b981;">
-                        <p style="margin: 0; color: #064e3b;">
-                            <strong>Estado del feedback:</strong> <span id="feedback-message"></span>
-                        </p>
-                    </div>
-                    <p style="color: #666; margin-top: 20px;">
-                        Nos pondremos en contacto contigo pronto con los próximos pasos.
+                        Agradecemos mucho tu tiempo y opiniones. Tu feedback es invaluable para seguir mejorando nuestro proceso de entrevistas de screening.
                     </p>
                 </div>
             </div>
@@ -654,7 +627,6 @@
             aiInteraction: null,
             questionsAligned: null,
             skillsReflection: null,
-            unreflectedCompetencies: null,
             englishExpression: null,
             wantsFeedback: null,
             additionalComment: null
@@ -719,10 +691,6 @@
             // Textareas
             document.querySelector('textarea[name="otherTechnicalIssues"]').addEventListener('input', function() {
                 responses.otherTechnicalIssues = this.value;
-            });
-
-            document.querySelector('textarea[name="unreflectedCompetencies"]').addEventListener('input', function() {
-                responses.unreflectedCompetencies = this.value;
             });
 
             document.querySelector('textarea[name="additionalComment"]').addEventListener('input', function() {
@@ -839,12 +807,6 @@
                     timestamp: new Date().toISOString()
                 });
 
-                // Mostrar mensaje según si quiere feedback o no
-                const feedbackMessage = responses.wantsFeedback === 'yes' 
-                    ? 'Te enviaremos tu feedback detallado en los próximos días'
-                    : 'Hemos registrado que prefieres no recibir feedback';
-                
-                document.getElementById('feedback-message').textContent = feedbackMessage;
                 showScreen('success-screen');
                 
             } catch (error) {
