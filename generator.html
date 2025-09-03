@@ -354,19 +354,27 @@
     </div>
 
     <script>
-        // Auto-detectar URLs base si estamos en GitHub Pages
+        // Auto-detectar URLs base
         document.addEventListener('DOMContentLoaded', function() {
             const currentURL = window.location.href;
             const isGitHubPages = currentURL.includes('github.io');
+            const isSeedsMatch = currentURL.includes('feedback.seedsmatch.com');
+            const isLocalhost = currentURL.includes('localhost') || currentURL.includes('127.0.0.1');
             
-            if (isGitHubPages) {
-                // Extraer la URL base de GitHub Pages
+            if (isSeedsMatch) {
+                // Dominio personalizado de Seeds
+                const baseURL = 'http://feedback.seedsmatch.com/';
+                document.getElementById('interview-base-url').value = baseURL + 'interview-feedback.html';
+                document.getElementById('screening-base-url').value = baseURL + 'screening-feedback.html';
+                document.getElementById('evaluation-base-url').value = baseURL + 'feedback-evaluation.html';
+            } else if (isGitHubPages) {
+                // GitHub Pages estándar
                 const baseURL = currentURL.replace('/generator.html', '/');
                 document.getElementById('interview-base-url').value = baseURL + 'interview-feedback.html';
                 document.getElementById('screening-base-url').value = baseURL + 'screening-feedback.html';
                 document.getElementById('evaluation-base-url').value = baseURL + 'feedback-evaluation.html';
-            } else if (currentURL.includes('localhost') || currentURL.includes('127.0.0.1')) {
-                // Para servidor local
+            } else if (isLocalhost) {
+                // Servidor local
                 const baseURL = currentURL.replace('/generator.html', '/');
                 document.getElementById('interview-base-url').value = baseURL + 'interview-feedback.html';
                 document.getElementById('screening-base-url').value = baseURL + 'screening-feedback.html';
