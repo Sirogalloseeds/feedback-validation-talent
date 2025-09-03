@@ -225,17 +225,17 @@
         <h1>🔗 Generador de URLs - Seeds Feedback</h1>
         
         <div class="tab-container">
-            <div class="tab active" onclick="switchTab('interview')">📋 Encuesta de Entrevista</div>
+            <div class="tab active" onclick="switchTab('interview')">📋 Validación de Seeds</div>
             <div class="tab screening-tab" onclick="switchTab('screening')">🤖 Screening de IA</div>
             <div class="tab" onclick="switchTab('evaluation')">📊 Evaluación de Feedback</div>
         </div>
 
-        <!-- TAB 1: Encuesta de Entrevista -->
+        <!-- TAB 1: Validación de Seeds -->
         <div id="interview-tab" class="tab-content active">
-            <h2>URL para Encuesta de Entrevista</h2>
+            <h2>URL para Encuesta de Validación de Seeds</h2>
             
             <div class="info-box">
-                <strong>ℹ️ Información:</strong> Esta encuesta se envía después de la entrevista para recopilar feedback inicial. <strong>No necesita URL única - todos los candidatos usan la misma URL.</strong>
+                <strong>ℹ️ Información:</strong> Esta encuesta se envía después de la validación de Seeds para recopilar feedback inicial. <strong>No necesita URL única - todos los candidatos usan la misma URL.</strong>
             </div>
 
             <form id="interview-form">
@@ -251,7 +251,7 @@
                 <h3>📨 Cómo usar esta URL:</h3>
                 <ol>
                     <li>Copia la URL que aparece arriba</li>
-                    <li>Envíala a <strong>TODOS</strong> los candidatos después de su entrevista</li>
+                    <li>Envíala a <strong>TODOS</strong> los candidatos después de su validación de Seeds</li>
                     <li>Cada persona completará su encuesta individual</li>
                     <li>Todas las respuestas se guardarán automáticamente en Google Sheets</li>
                     <li>Revisa quiénes respondieron "Sí" a recibir feedback para el siguiente paso</li>
@@ -277,12 +277,11 @@
             </form>
 
             <div class="warning-box" style="margin-top: 20px;">
-                <h3>🔍 Diferencias con la Encuesta de Entrevista:</h3>
+                <h3>🔍 Diferencias con la Encuesta de Validación de Seeds:</h3>
                 <ul>
                     <li><strong>Enfoque específico:</strong> Pregunta sobre habilidades reflejadas para el puesto</li>
                     <li><strong>Porcentaje de preguntas útiles:</strong> Mide qué tan relevantes fueron las preguntas</li>
                     <li><strong>Preguntas poco relevantes:</strong> Identifica preguntas que no aportaron valor</li>
-                    <li><strong>Competencias no reflejadas:</strong> Aspectos del perfil que no se pudieron mostrar</li>
                 </ul>
             </div>
 
@@ -404,8 +403,8 @@
                 return;
             }
             
-            // Para la encuesta de entrevista, simplemente usamos la URL base
-            showResult('Encuesta de Entrevista (URL Simple)', 'Todos los candidatos', 'Todas las posiciones', baseURL);
+            // Para la encuesta de validación de Seeds, simplemente usamos la URL base
+            showResult('Encuesta de Validación de Seeds (URL Simple)', 'Todos los candidatos', 'Todas las posiciones', baseURL);
         }
 
         function getScreeningURL() {
