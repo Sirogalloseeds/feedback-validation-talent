@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback de entrevista de Screening - Seeds</title>
+    <title>Feedback de entrevista de Validación de Seeds - Seeds</title>
     <style>
         * {
             margin: 0;
@@ -358,12 +358,12 @@
         <div id="survey-screen">
             <div class="header">
                 <img src="seeds-logo.png" alt="Seeds" class="seeds-logo">
-                <h1>Feedback de entrevista de Screening</h1>
+                <h1>Feedback de entrevista de Validación de Seeds</h1>
                 <p>Tu opinión nos ayuda a mejorar continuamente</p>
             </div>
             <div class="content">
-                <!-- Datos personales -->
-                <div class="question-card">
+                <!-- Datos personales (se oculta si viene SFC) -->
+                <div class="question-card" id="contact-info-card">
                     <h3>Información de contacto</h3>
                     <input type="email" class="input-field" name="email" placeholder="Tu email" required>
                     <input type="text" class="input-field" name="fullName" placeholder="Nombre y Apellido" required>
@@ -371,7 +371,7 @@
 
                 <!-- NPS -->
                 <div class="question-card">
-                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestra entrevista de screening a un amigo o colega?</h3>
+                    <h3>En una escala de 0 a 10, ¿qué tan probable es que recomiendes nuestra entrevista de validación de Seeds a un amigo o colega?</h3>
                     <div class="nps-scale" id="nps-scale">
                         <!-- Se genera dinámicamente -->
                     </div>
@@ -490,48 +490,25 @@
                     </div>
                 </div>
 
-                <!-- Alineación con habilidades del puesto -->
+                <!-- Expresión profesional -->
                 <div class="question-card">
-                    <h3>¿Las preguntas de la entrevista estuvieron alineadas con las habilidades necesarias para el puesto?</h3>
+                    <h3>¿Pudiste expresar tu trayectoria profesional y experiencia de forma clara durante la entrevista?</h3>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="questionsAligned" value="strongly_agree">
-                            <span>Muy de acuerdo</span>
+                            <input type="radio" name="professionalExpression" value="completely">
+                            <span>Sí, completamente</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="questionsAligned" value="agree">
-                            <span>De acuerdo</span>
+                            <input type="radio" name="professionalExpression" value="partially">
+                            <span>Sí, parcialmente</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="questionsAligned" value="disagree">
-                            <span>En desacuerdo</span>
+                            <input type="radio" name="professionalExpression" value="difficulties">
+                            <span>No, tuve dificultades</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="questionsAligned" value="strongly_disagree">
-                            <span>Muy en desacuerdo</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Reflejar habilidades adecuadamente -->
-                <div class="question-card">
-                    <h3>¿Consideras que las preguntas te permitieron reflejar adecuadamente tus habilidades?</h3>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="strongly_agree">
-                            <span>Muy de acuerdo</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="agree">
-                            <span>De acuerdo</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="disagree">
-                            <span>En desacuerdo</span>
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="skillsReflection" value="strongly_disagree">
-                            <span>Muy en desacuerdo</span>
+                            <input type="radio" name="professionalExpression" value="not_at_all">
+                            <span>No, no pude expresar nada</span>
                         </label>
                     </div>
                 </div>
@@ -596,7 +573,7 @@
                     <div class="success-icon">🎉</div>
                     <h2 style="color: #333; margin-bottom: 20px;">Encuesta completada</h2>
                     <p style="color: #666; font-size: 1.1em; line-height: 1.6; margin-bottom: 20px;">
-                        Agradecemos mucho tu tiempo y opiniones. Tu feedback es invaluable para seguir mejorando nuestro proceso de entrevistas de screening.
+                        Agradecemos mucho tu tiempo y opiniones. Tu feedback es invaluable para seguir mejorando nuestro proceso de entrevistas de validación de Seeds.
                     </p>
                 </div>
             </div>
@@ -614,7 +591,8 @@
     <script>
         // Estado de respuestas
         let responses = {
-            candidateId: generateUniqueId(),
+            sfc: null, // Código único del candidato
+            candidateId: generateUniqueId(), // Mantener como fallback
             timestamp: new Date().toISOString(),
             email: null,
             fullName: null,
@@ -625,15 +603,44 @@
             technicalIssues: [],
             otherTechnicalIssues: null,
             aiInteraction: null,
-            questionsAligned: null,
-            skillsReflection: null,
+            professionalExpression: null,
             englishExpression: null,
             wantsFeedback: null,
             additionalComment: null
         };
 
         function generateUniqueId() {
-            return 'screening_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            return 'candidate_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        // Función para obtener SFC de la URL
+        function getSfcFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('sfc') || params.get('SFC');
+        }
+
+        // Función para pre-cargar SFC desde URL
+        function preloadSfcFromUrl() {
+            const sfc = getSfcFromUrl();
+            
+            if (sfc) {
+                // Guardar el SFC
+                responses.sfc = decodeURIComponent(sfc);
+                
+                // Ocultar completamente la tarjeta de información de contacto
+                const contactCard = document.getElementById('contact-info-card');
+                if (contactCard) {
+                    contactCard.style.display = 'none';
+                }
+                
+                console.log('✅ SFC detectado:', responses.sfc);
+                console.log('📧 Campos de contacto ocultos (no requeridos)');
+            } else {
+                console.log('ℹ️ Sin SFC - Modo normal (requiere email y nombre)');
+            }
+            
+            // Actualizar validación del formulario
+            checkFormComplete();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -645,7 +652,8 @@
             
             initializeComponents();
             setupEventListeners();
-            console.log('✅ Sistema de encuesta de screening cargado');
+            preloadSfcFromUrl(); // Pre-cargar SFC si existe en URL
+            console.log('✅ Sistema de encuesta de entrevista cargado');
         });
 
         function initializeComponents() {
@@ -675,8 +683,7 @@
             // Radio buttons
             setupRadioListeners('technicalProblems', showTechnicalProblems);
             setupRadioListeners('aiInteraction');
-            setupRadioListeners('questionsAligned');
-            setupRadioListeners('skillsReflection');
+            setupRadioListeners('professionalExpression');
             setupRadioListeners('englishExpression');
             setupRadioListeners('wantsFeedback');
 
@@ -788,11 +795,25 @@
         }
 
         function checkFormComplete() {
-            const required = ['email', 'fullName', 'nps', 'technicalProblems', 'aiInteraction', 'questionsAligned', 'skillsReflection', 'englishExpression', 'wantsFeedback'];
+            // Si hay SFC, no requerir email ni fullName
+            const hasSfc = responses.sfc !== null && responses.sfc !== '';
+            
+            let required;
+            if (hasSfc) {
+                // Con SFC: solo requiere las preguntas de la encuesta
+                required = ['nps', 'technicalProblems', 'aiInteraction', 'professionalExpression', 'englishExpression', 'wantsFeedback'];
+            } else {
+                // Sin SFC: requiere email, nombre y las preguntas
+                required = ['email', 'fullName', 'nps', 'technicalProblems', 'aiInteraction', 'professionalExpression', 'englishExpression', 'wantsFeedback'];
+            }
+            
             const isComplete = required.every(field => responses[field] !== null && responses[field] !== '');
             
-            // Validar email
-            const emailValid = responses.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responses.email);
+            // Validar email solo si no hay SFC
+            let emailValid = true;
+            if (!hasSfc && responses.email) {
+                emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responses.email);
+            }
             
             document.getElementById('submit-btn').disabled = !(isComplete && emailValid);
         }
@@ -803,7 +824,7 @@
             try {
                 await saveToGoogleSheets({
                     ...responses,
-                    surveyType: 'screening_feedback',
+                    surveyType: 'interview_feedback',
                     timestamp: new Date().toISOString()
                 });
 
@@ -923,8 +944,12 @@
             }
         }
 
-        console.log('🚀 Sistema de encuesta de screening iniciado');
-        console.log('🆔 ID del candidato:', responses.candidateId);
+        console.log('🚀 Sistema de encuesta de entrevista iniciado');
+        if (responses.sfc) {
+            console.log('🆔 SFC del candidato:', responses.sfc);
+        } else {
+            console.log('🆔 ID del candidato (generado):', responses.candidateId);
+        }
     </script>
 </body>
 </html>
